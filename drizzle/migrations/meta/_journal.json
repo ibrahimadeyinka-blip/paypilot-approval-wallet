@@ -8,6 +8,13 @@
       "when": 1794034405411,
       "tag": "0000_agent_history_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794034605055,
+      "tag": "0001_restore_remix_signup_and_history_permissions",
+      "breakpoints": true
     }
   ]
 }
