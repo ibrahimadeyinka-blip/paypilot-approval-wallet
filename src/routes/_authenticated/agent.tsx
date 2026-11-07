@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/agent")({
   component: AgentChat,
 });
 
-type Msg = { role: "user" | "assistant"; content: string; draft?: DirectiveDraft };
+type Msg = { role: "user" | "assistant"; content: string; draft?: DirectiveDraft | undefined };
 const money = (c: number) => `$${(c / 100).toFixed(2)}`;
 const EXAMPLE = "Find a contractor to design a minimalist blue tech logo. Budget is $100. Put the funds in escrow.";
 
