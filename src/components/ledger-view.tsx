@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useWebMCP } from "use-webmcp-tool";
-import { Download, Search, ChevronRight, X, History, ReceiptText } from "lucide-react";
+import { Download, Search, X, History, ReceiptText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -10,13 +10,18 @@ import { ledgerQuery, ledgerTotals, money, csvCell } from "@/lib/ledger";
 import { statusMeta } from "@/lib/agent/status";
 import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 
+const PaymentGrid = lazy(() => import("./payment-grid"));
+const AuditGrid = lazy(() => import("./payment-grid").then(m => ({ default: m.AuditGrid })));
+
 export function LedgerView({ mode }: { mode: "history" | "ledger" }) {
   const { data: rows } = useSuspenseQuery(ledgerQuery);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const visible = rows.filter(r => (status === "all" || r.status === status) && `${r.vendor_name} ${r.merchant_handle} ${r.description} ${r.id}`.toLowerCase().includes(search.toLowerCase()));
-  const selected = visible.find(r => r.id === selectedId);
+  const [gridIds, setGridIds] = useState<string[] | null>(null);
+  const filtered = rows.filter(r => (status === "all" || r.status === status) && `${r.vendor_name} ${r.merchant_handle} ${r.description} ${r.id}`.toLowerCase().includes(search.toLowerCase()));
+  const visible = gridIds === null ? filtered : gridIds.flatMap(id => { const row = filtered.find(r => r.id === id); return row ? [row] : []; });
+  const selected = rows.find(r => r.id === selectedId);
   const totals = ledgerTotals(visible);
   useWebMCP({
     name: "read_payment_history",
@@ -51,17 +56,13 @@ export function LedgerView({ mode }: { mode: "history" | "ledger" }) {
       {(search || status !== "all") && <Button variant="ghost" size="icon" aria-label="Clear filters" onClick={() => { setSearch(""); setStatus("all"); }}><X className="size-4" /></Button>}
     </div>
     <div className="flex justify-between text-xs text-muted-foreground"><span>{visible.length} payments</span>{rows.length === 500 && <span>Latest 500 requests</span>}<Badge variant="outline">PayPal Sandbox</Badge></div>
-    {!visible.length ? <div className="empty-state min-h-64"><Icon className="mx-auto mb-3 size-8" /><p>{rows.length ? "No payments match your filters." : "No payment requests yet."}</p></div> : <div className="overflow-x-auto border-y">
-      <table className="w-full text-left text-sm"><thead className="bg-muted/50 text-xs text-muted-foreground"><tr><th className="px-3 py-3">Created</th><th className="px-3 py-3">Merchant</th><th className="px-3 py-3 text-right">Amount</th><th className="px-3 py-3">Status</th><th className="px-3 py-3"><span className="sr-only">Details</span></th></tr></thead>
-        <tbody>{visible.map(r => <tr key={r.id} className="border-t transition-colors hover:bg-accent/40"><td className="whitespace-nowrap px-3 py-4 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td><td className="min-w-40 px-3 py-4"><p className="font-medium">{r.vendor_name}</p><p className="mt-1 max-w-64 truncate text-xs text-muted-foreground">{r.description}</p></td><td className="whitespace-nowrap px-3 py-4 text-right font-mono">{money(r.amount_cents, r.currency)}</td><td className="px-3 py-4"><Badge variant={statusMeta(r.status).tone}>{statusMeta(r.status).label}</Badge></td><td className="px-3 py-4"><Button variant="ghost" size="icon" aria-label={`View ${r.vendor_name} history`} onClick={() => setSelectedId(r.id)}><ChevronRight className="size-4" /></Button></td></tr>)}</tbody>
-      </table>
-    </div>}
-    <Dialog open={Boolean(selected)} onOpenChange={open => { if (!open) setSelectedId(null); }}><DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-2xl"><DialogHeader><DialogTitle>{selected?.vendor_name} — payment history</DialogTitle></DialogHeader>
+    {!rows.length ? <div className="empty-state min-h-64"><Icon className="mx-auto mb-3 size-8" /><p>No payment requests yet.</p></div> : <Suspense fallback={<div className="empty-state min-h-64">Loading payment records…</div>}><PaymentGrid rows={filtered} onOpen={setSelectedId} onVisibleIds={ids => setGridIds(previous => previous?.join(",") === ids.join(",") ? previous : ids)} /></Suspense>}
+    <Dialog open={Boolean(selected)} onOpenChange={open => { if (!open) setSelectedId(null); }}><DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-5xl"><DialogHeader><DialogTitle>{selected?.vendor_name} — payment history</DialogTitle></DialogHeader>
       {selected && <><div className="flex items-center gap-3"><span className="font-mono text-xl">{money(selected.amount_cents, selected.currency)}</span><Badge variant={statusMeta(selected.status).tone}>{statusMeta(selected.status).label}</Badge></div>
         <p className="break-words text-sm">{selected.description}</p>
         <dl className="grid gap-2 border-y py-3 text-xs">{[["Request", selected.id], ["PayPal order", selected.paypal_order_id], ["Authorization", selected.paypal_authorization_id], ["Capture", selected.paypal_capture_id], ["Capture status", selected.paypal_capture_status]].filter(([, v]) => v).map(([k, v]) => <div key={k} className="grid grid-cols-[8rem_1fr] gap-2"><dt className="text-muted-foreground">{k}</dt><dd className="break-all font-mono">{v}</dd></div>)}</dl>
         <div><p className="mb-2 text-xs font-medium text-muted-foreground">Agent-provided source</p><blockquote className="break-words border-l-2 pl-3 text-sm">{selected.source_context}</blockquote></div>
-        <ol className="space-y-5 border-l pl-4">{timeline.map(e => <li key={e.id}><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-sm font-medium">{e.title}</p><Badge variant="outline">{e.actor}</Badge></div><time className="text-xs text-muted-foreground">{new Date(e.created_at).toLocaleString()}</time>{e.detail && <p className="mt-2 break-words text-sm text-muted-foreground">{e.detail}</p>}<details className="mt-2 text-xs"><summary className="cursor-pointer text-muted-foreground">Event metadata</summary><pre className="mt-2 whitespace-pre-wrap break-all rounded-md bg-muted p-3">{JSON.stringify(e.metadata, null, 2)}</pre></details></li>)}</ol>
+        <Suspense fallback={<div className="empty-state">Loading audit timeline…</div>}><AuditGrid rows={timeline} /></Suspense>
       </>}
     </DialogContent></Dialog>
   </main>;

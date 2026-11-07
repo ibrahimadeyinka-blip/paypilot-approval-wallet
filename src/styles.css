@@ -1,6 +1,8 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "ag-grid-community/styles/ag-grid.css";
+@import "ag-grid-community/styles/ag-theme-quartz.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -249,6 +251,32 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.035em; }
 .rail-draw { stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw 1.6s 200ms cubic-bezier(.6,0,.2,1) forwards; }
 @keyframes draw { to { stroke-dashoffset: 0; } }
 .bar-grow { transform-origin: bottom; animation: bar 900ms cubic-bezier(.2,.8,.2,1) both; }
+.payrail-grid {
+  --ag-background-color: var(--card);
+  --ag-foreground-color: var(--foreground);
+  --ag-header-background-color: var(--muted);
+  --ag-header-foreground-color: var(--muted-foreground);
+  --ag-border-color: var(--border);
+  --ag-secondary-border-color: var(--border);
+  --ag-row-border-color: var(--border);
+  --ag-odd-row-background-color: var(--card);
+  --ag-row-hover-color: var(--accent);
+  --ag-selected-row-background-color: var(--accent);
+  --ag-active-color: var(--signal);
+  --ag-input-focus-border-color: var(--ring);
+  --ag-input-border-color: var(--input);
+  --ag-control-panel-background-color: var(--background);
+  --ag-font-family: var(--font-sans);
+  --ag-font-size: 13px;
+  --ag-wrapper-border-radius: 0;
+  --ag-grid-size: 6px;
+  width: 100%;
+  min-width: 0;
+}
+.payment-grid { height: 620px; }
+.audit-grid { height: 360px; }
+.payrail-grid .ag-cell { display: flex; align-items: center; }
+.payrail-grid .ag-cell-wrap-text { align-items: flex-start; padding-top: 10px; padding-bottom: 10px; }
 @keyframes bar { from { transform: scaleY(0); } }
 @media (max-width: 767px) { .app-main { padding: 28px 20px; } .page-heading { font-size: 34px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; transition-duration: 0s !important; } .rail-draw { stroke-dashoffset: 0; } }
