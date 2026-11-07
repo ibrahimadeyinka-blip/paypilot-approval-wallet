@@ -12,6 +12,8 @@ import {
   agentTokensQuery,
   issueAgentToken,
   parseMerchantList,
+  dollarsToCents,
+  validateCaps,
   revokeAgentToken,
   TOKEN_LIFETIMES,
 } from "@/lib/agent/tokens";
@@ -45,6 +47,8 @@ function Wallet() {
   const [label, setLabel] = useState("");
   const [lifetime, setLifetime] = useState(7);
   const [merchants, setMerchants] = useState("");
+  const [singleCap, setSingleCap] = useState("100");
+  const [dailyCap, setDailyCap] = useState("500");
   const [busy, setBusy] = useState(false);
   const [secret, setSecret] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -56,9 +60,16 @@ function Wallet() {
       toast.error("Add at least one approved merchant.");
       return;
     }
+    const single = dollarsToCents(singleCap);
+    const daily = dollarsToCents(dailyCap);
+    const capError = validateCaps(single, daily);
+    if (capError) {
+      toast.error(capError);
+      return;
+    }
     setBusy(true);
     try {
-      const { secret } = await issueAgentToken(label.trim(), lifetime, list);
+      const { secret } = await issueAgentToken(label.trim(), lifetime, list, single!, daily!);
       setSecret(secret);
       setLabel("");
       setMerchants("");
@@ -86,7 +97,7 @@ function Wallet() {
   return (
     <main className="app-main space-y-9">
       <div className="flex flex-wrap items-start justify-between gap-4"><div><span className="eyebrow">AGENT PAYMENT INFRASTRUCTURE</span><h1 className="page-heading mt-3">Agent Wallet</h1><p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">Give your agents room to work. Keep their spending in bounds.</p></div><span className="flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-xs text-primary"><ShieldCheck className="size-4" /> Guardrails enforced</span></div>
-      <div className="grid grid-cols-2 divide-x border-y bg-card py-6 md:grid-cols-4">{[["Active tokens", String(tokens.filter(t => !t.revoked && new Date(t.expires_at).getTime() > now).length)], ["Per-payment cap", "$100"], ["Rolling 24h budget", "$500"], ["Total requests", String(requests.length)]].map(([name,value]) => <div key={name} className="px-4 py-2 sm:px-6"><p className="text-xs text-muted-foreground">{name}</p><p className="mt-3 font-display text-3xl font-semibold tabular-nums">{value}</p></div>)}</div>
+      <div className="grid grid-cols-2 divide-x border-y bg-card py-6 md:grid-cols-4">{[["Active tokens", String(tokens.filter(t => !t.revoked && new Date(t.expires_at).getTime() > now).length)], ["Default per-payment cap", "$100"], ["Default 24h budget", "$500"], ["Total requests", String(requests.length)]].map(([name,value]) => <div key={name} className="px-4 py-2 sm:px-6"><p className="text-xs text-muted-foreground">{name}</p><p className="mt-3 font-display text-3xl font-semibold tabular-nums">{value}</p></div>)}</div>
       {secret && (
         <div className="space-y-3 rounded-md border border-primary/40 bg-accent p-5">
           <div className="flex items-center gap-2 font-medium text-accent-foreground">
@@ -129,6 +140,18 @@ function Wallet() {
           <Label htmlFor="merchants">Approved merchants</Label>
           <Input id="merchants" placeholder="figma.com, upwork.com" value={merchants} onChange={(e) => setMerchants(e.target.value)} required />
         </div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:col-span-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="single-cap">Max per payment (USD)</Label>
+            <Input id="single-cap" inputMode="decimal" placeholder="150" value={singleCap} onChange={(e) => setSingleCap(e.target.value)} required />
+            <p className="text-xs text-muted-foreground">Any single request above this is blocked.</p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="daily-cap">Rolling 24h budget (USD)</Label>
+            <Input id="daily-cap" inputMode="decimal" placeholder="500" value={dailyCap} onChange={(e) => setDailyCap(e.target.value)} required />
+            <p className="text-xs text-muted-foreground">Total this agent can have pending or held in any 24 hours.</p>
+          </div>
+        </div>
         <Button type="submit" disabled={busy}>
           <KeyRound className="size-4" /> Issue token
         </Button>
@@ -148,7 +171,7 @@ function Wallet() {
                     {t.revoked ? <Badge variant="destructive">Revoked</Badge> : expired ? <Badge variant="secondary">Expired</Badge> : <Badge>Active</Badge>}
                   </div>
                   <div className="break-words font-mono text-xs leading-relaxed text-muted-foreground">
-                    {t.token_prefix}… · expires {new Date(t.expires_at).toLocaleString()} · {t.merchant_whitelist.join(", ") || "no merchants"}
+                    {t.token_prefix}… · max {usd(t.single_cap_cents)}/payment · {usd(t.daily_cap_cents)}/24h · expires {new Date(t.expires_at).toLocaleString()} · {t.merchant_whitelist.join(", ") || "no merchants"}
                   </div>
                 </div>
                 {!t.revoked && !expired && (
