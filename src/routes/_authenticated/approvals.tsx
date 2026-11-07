@@ -41,9 +41,9 @@ function Approvals() {
   const done = requests.filter((r) => !NEEDS_ACTION.has(r.status) && !ON_HOLD.has(r.status));
 
   return (
-    <main className="mx-auto max-w-5xl space-y-8 px-6 py-8">
+    <main className="app-main space-y-9">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Approvals</h1>
+        <span className="eyebrow">HUMAN IN THE LOOP</span><h1 className="page-heading mt-3">Approvals</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
           Nothing is paid until you approve. Approving places a PayPal Sandbox <strong>authorization hold</strong> — the
           money is reserved, not taken. It's captured only after the delivery is reviewed.
@@ -51,28 +51,28 @@ function Approvals() {
       </div>
 
       <section className="space-y-3">
-        <h2 className="font-semibold">Needs your decision ({open.length})</h2>
-        {open.length === 0 && <p className="text-sm text-muted-foreground">You're all caught up.</p>}
+        <h2 className="section-heading">Needs your decision ({open.length})</h2>
+        {open.length === 0 && <div className="empty-state"><ShieldCheck className="size-6 text-primary" /><p>You’re all caught up.</p></div>}
         {open.map((r) => (
           <RequestCard key={r.id} r={r} />
         ))}
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-semibold">Funds on hold — waiting for delivery ({held.length})</h2>
+        <h2 className="section-heading">Funds on hold — waiting for delivery ({held.length})</h2>
         <p className="text-sm text-muted-foreground">
           Send the merchant a private upload link. Their file is reviewed by AI against your requirements; payment is
           released only if it clearly matches. Anything unclear comes back to you.
         </p>
-        {held.length === 0 && <p className="text-sm text-muted-foreground">Nothing on hold.</p>}
+        {held.length === 0 && <div className="empty-state"><p>Nothing on hold.</p></div>}
         {held.map((r) => (
           <RequestCard key={r.id} r={r} />
         ))}
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-semibold">History</h2>
-        {done.length === 0 && <p className="text-sm text-muted-foreground">No decided requests yet.</p>}
+        <h2 className="section-heading">History</h2>
+        {done.length === 0 && <div className="empty-state"><p>No decided requests yet.</p></div>}
         {done.map((r) => (
           <RequestCard key={r.id} r={r} />
         ))}
@@ -146,11 +146,11 @@ function RequestCard({ r }: { r: Req }) {
   }
 
   return (
-    <article className="overflow-hidden rounded-xl border bg-card">
+    <article className="overflow-hidden rounded-md border bg-card">
       <header className="flex flex-wrap items-start justify-between gap-3 border-b px-5 py-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-semibold">{r.vendor_name}</h3>
+            <h3 className="section-heading">{r.vendor_name}</h3>
             <span className="font-mono text-xs text-muted-foreground">{r.merchant_handle}</span>
             <Badge variant={meta.tone}>{meta.label}</Badge>
           </div>

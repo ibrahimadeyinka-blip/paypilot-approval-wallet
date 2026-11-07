@@ -1,3 +1,4 @@
+import { PublicFrame } from "@/components/public-frame";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -37,15 +38,15 @@ function ResetPassword() {
     navigate({ to: "/wallet" });
   }
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-xl border bg-card p-6">
-        <h1 className="text-lg font-semibold">Choose a new password</h1>
+    <PublicFrame>
+      <form onSubmit={submit} className="space-y-6">
+        <h1 className="page-heading">Choose a new password</h1>
         <div className="space-y-1.5">
           <Label htmlFor="pw">New password</Label>
           <Input id="pw" type="password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} required />
         </div>
         <Button type="submit" className="w-full" disabled={busy}>Save password</Button>
       </form>
-    </div>
+    </PublicFrame>
   );
 }

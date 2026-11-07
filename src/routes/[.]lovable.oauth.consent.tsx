@@ -1,3 +1,4 @@
+import { PublicFrame } from "@/components/public-frame";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,11 +50,11 @@ function Consent() {
     }
   }
   const scopes = details.scopes ?? (details.scope ?? "").split(" ").filter(Boolean);
-  return <main className="mx-auto max-w-lg space-y-6 px-6 py-16"><p className="font-semibold text-primary">Payrail</p><h1 className="text-2xl font-bold">Connect {client} to Payrail</h1><p className="break-all text-sm text-muted-foreground">{accountEmail}</p>
+  return <PublicFrame><main className="space-y-6"><span className="eyebrow">SECURE ACCOUNT CONNECTION</span><h1 className="text-2xl font-bold">Connect {client} to Payrail</h1><p className="break-all text-sm text-muted-foreground">{accountEmail}</p>
     <p>This lets {client} use this app as you.</p>
     <dl className="space-y-3 border-y py-4 text-sm"><div><dt className="text-muted-foreground">Client</dt><dd>{client}</dd></div>{details.redirect_uri && <div><dt className="text-muted-foreground">Return address</dt><dd className="break-all">{details.redirect_uri}</dd></div>}</dl>
     <ul className="space-y-2 text-sm"><li>Read your payment requests and history.</li><li>No approval, capture, or hold-release tools.</li>{scopes.map(scope => <li key={scope}>{({ openid: "Identify your account", email: "Share your email address", profile: "Share your basic profile" } as Record<string, string>)[scope] ?? `Additional permission requested: ${scope}`}</li>)}</ul>
     <p className="text-sm text-muted-foreground">This does not bypass your account's permissions or access rules.</p>{error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     <div className="flex gap-3"><Button disabled={busy} onClick={() => decide(true)}>Approve connection</Button><Button variant="outline" disabled={busy} onClick={() => decide(false)}>Cancel connection</Button></div>
-  </main>;
+  </main></PublicFrame>;
 }

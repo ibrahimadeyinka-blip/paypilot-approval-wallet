@@ -1,3 +1,4 @@
+import { PublicFrame } from "@/components/public-frame";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
@@ -49,8 +50,8 @@ function PaypalReturn() {
   const waiting = result === null;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-6">
-      <div className="w-full max-w-md space-y-4 rounded-xl border bg-card p-6 text-center">
+    <PublicFrame>
+      <div className="space-y-6 text-center">
         <div className="flex justify-center">
           {waiting ? (
             <Loader2 className="size-8 animate-spin text-muted-foreground" />
@@ -60,7 +61,7 @@ function PaypalReturn() {
             <XCircle className="size-8 text-destructive" />
           )}
         </div>
-        <h1 className="text-lg font-semibold">
+        <h1 className="text-2xl font-semibold">
           {waiting ? "Confirming with PayPal…" : ok ? "Funds are on hold" : "No hold placed"}
         </h1>
         <p className="text-sm text-muted-foreground">{result?.message ?? "This takes a few seconds."}</p>
@@ -73,6 +74,6 @@ function PaypalReturn() {
           </div>
         )}
       </div>
-    </main>
+    </PublicFrame>
   );
 }
