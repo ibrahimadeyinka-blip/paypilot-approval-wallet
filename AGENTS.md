@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- Agent payment guardrails (single cap, rolling 24h budget, merchant allowlist, token expiry/revocation, idempotency) are enforced only inside the `submit_agent_payment` database function, called by `/api/public/agent-gateway`; the function locks the token row so concurrent requests serialize. Why: one atomic, server-side source of truth that cannot be bypassed or raced.
+- Pending and approved agent requests both count toward the 24h budget. Why: pending requests reserve budget so approval can't exceed the limit.
+- Agent tokens are stored only as SHA-256 hashes; the plaintext is shown once at issue time. Why: a database leak must not leak usable tokens.
