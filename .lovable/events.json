@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "events": {
+    "project.agent_request_drafted": {
+      "event_schema_version": 1,
+      "description": "The agent drafted a payment request from an owner's chat directive.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "properties": {
+          "ready": {
+            "type": "boolean"
+          },
+          "amount_cents": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}
