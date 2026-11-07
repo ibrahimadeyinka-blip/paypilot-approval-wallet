@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Revamp all Payrail screens with reference-inspired design, typography, motion, and a custom favicon; preserve payment logic
 - [x] Verify the remix has a clean, empty migration baseline and the correct database connection
 - [x] Slice 1 — Secure agent wallet and guarded gateway
 - [ ] Slice 2 — Source evidence, owner approval, PayPal Sandbox authorization (built; live PayPal check needs Sandbox keys)
