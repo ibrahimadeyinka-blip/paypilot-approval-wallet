@@ -240,6 +240,6 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: 0; }
 .animate-enter { animation: enter 650ms ease-out both; }
 @keyframes enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 .hero-image { animation: image-reveal 1.2s ease-out both; }
-@keyframes image-reveal { from { opacity: .6; transform: scale(1.025); } to { opacity: 1; transform: scale(1); } }
+@keyframes image-reveal { from { transform: scale(1.025); } to { transform: scale(1); } }
 @media (max-width: 767px) { .app-main { padding: 28px 20px; } .page-heading { font-size: 28px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; transition-duration: 0s !important; } }
