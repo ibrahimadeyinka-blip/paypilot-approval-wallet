@@ -54,7 +54,7 @@ function Analytics() {
             <div className="mt-2 h-px bg-border" />
           </div>)}
         </div>
-        <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground"><span>{days[0].day.slice(5)}</span><span>Today</span></div>
+        <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground"><span>{days[0]?.day.slice(5)}</span><span>Today</span></div>
       </section>
 
       <section className="rounded-xl border bg-card p-6">

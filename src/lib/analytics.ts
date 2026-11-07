@@ -43,11 +43,11 @@ export function daily(drafts: DraftRow[], history: HistoryRow[], now = new Date(
     return { day: d.toISOString().slice(0, 10), drafted: 0, sent: 0, blocked: 0 };
   });
   const idx = new Map(days.map((d, i) => [d.day, i]));
-  for (const d of drafts) { const i = idx.get(d.created_at.slice(0, 10)); if (i !== undefined) days[i].drafted++; }
+  for (const d of drafts) { const i = idx.get(d.created_at.slice(0, 10)); const day = i === undefined ? undefined : days[i]; if (day) day.drafted++; }
   for (const h of history) {
     if (h.event !== "request_received") continue;
-    const i = idx.get(h.created_at.slice(0, 10)); if (i === undefined) continue;
-    if (h.to_status === "blocked") days[i].blocked++; else days[i].sent++;
+    const i = idx.get(h.created_at.slice(0, 10)); const day = i === undefined ? undefined : days[i]; if (!day) continue;
+    if (h.to_status === "blocked") day.blocked++; else day.sent++;
   }
   return days;
 }
