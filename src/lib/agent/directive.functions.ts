@@ -62,7 +62,14 @@ export const draftDirective = createServerFn({ method: "POST" })
       console.error("draftDirective failed", err);
       throw new Error("The agent couldn't read that right now. Please try again.");
     }
-    return normalizeDraft(raw, token.merchant_whitelist);
+    const draft = normalizeDraft(raw, token.merchant_whitelist);
+    // Analytics only: a failed insert must never block the owner's draft.
+    const { error: logErr } = await context.supabase.from("agent_drafts").insert({
+      owner_id: context.userId, token_id: token.id, ready: !!(draft as { ready?: boolean }).ready,
+      amount_cents: Number((draft as { draft?: { amount_cents?: number } }).draft?.amount_cents ?? 0) || 0,
+    });
+    if (logErr) console.error("agent_drafts insert failed", logErr.message);
+    return draft;
   });
 
 export const submitDirective = createServerFn({ method: "POST" })
