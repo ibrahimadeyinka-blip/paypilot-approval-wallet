@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { Ban, Check, Copy, KeyRound, ShieldCheck } from "lucide-react";
+import { Ban, Check, Copy, KeyRound, ShieldCheck, Wallet as WalletIcon, ArrowUpRight, Activity, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -84,17 +84,11 @@ function Wallet() {
   const now = Date.now();
 
   return (
-    <main className="mx-auto max-w-5xl space-y-8 px-6 py-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Agent Wallet</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Give an agent a time-limited token. Every payment it asks for is checked on our server: $100 per
-          payment, $500 per rolling 24 hours, and only merchants you list.
-        </p>
-      </div>
-
+    <main className="app-main space-y-9">
+      <div className="flex flex-wrap items-start justify-between gap-4"><div><span className="eyebrow">AGENT PAYMENT INFRASTRUCTURE</span><h1 className="page-heading mt-3">Agent Wallet</h1><p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">Give your agents room to work. Keep their spending in bounds.</p></div><span className="flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-xs text-primary"><ShieldCheck className="size-4" /> Guardrails enforced</span></div>
+      <div className="grid grid-cols-2 divide-x border-y bg-card py-6 md:grid-cols-4">{[["Active tokens", String(tokens.filter(t => !t.revoked && new Date(t.expires_at).getTime() > now).length)], ["Per-payment cap", "$100"], ["Rolling 24h budget", "$500"], ["Total requests", String(requests.length)]].map(([name,value]) => <div key={name} className="px-4 py-2 sm:px-6"><p className="text-xs text-muted-foreground">{name}</p><p className="mt-3 font-display text-3xl font-semibold tabular-nums">{value}</p></div>)}</div>
       {secret && (
-        <div className="space-y-3 rounded-xl border border-primary/40 bg-accent p-5">
+        <div className="space-y-3 rounded-md border border-primary/40 bg-accent p-5">
           <div className="flex items-center gap-2 font-medium text-accent-foreground">
             <ShieldCheck className="size-4" /> Copy this token now — it won't be shown again.
           </div>
@@ -102,6 +96,7 @@ function Wallet() {
             <code className="flex-1 break-all rounded-md bg-card px-3 py-2 font-mono text-sm">{secret}</code>
             <Button
               variant="outline"
+              aria-label="Copy agent token" title="Copy agent token"
               onClick={async () => {
                 await navigator.clipboard.writeText(secret);
                 setCopied(true);
@@ -115,7 +110,7 @@ function Wallet() {
         </div>
       )}
 
-      <form onSubmit={issue} className="grid gap-4 rounded-xl border bg-card p-5 md:grid-cols-[1fr_auto_1.4fr_auto] md:items-end">
+      <section className="border-b pb-8"><div className="mb-5 flex items-center gap-2"><KeyRound className="size-4 text-primary" /><h2 className="section-heading">Issue an agent token</h2></div><form onSubmit={issue} className="grid gap-5 lg:grid-cols-[1fr_auto]">
         <div className="space-y-1.5">
           <Label htmlFor="label">Agent name</Label>
           <Input id="label" placeholder="Research assistant" value={label} onChange={(e) => setLabel(e.target.value)} required maxLength={80} />
@@ -131,18 +126,18 @@ function Wallet() {
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="merchants">Approved merchants (comma separated)</Label>
+          <Label htmlFor="merchants">Approved merchants</Label>
           <Input id="merchants" placeholder="figma.com, upwork.com" value={merchants} onChange={(e) => setMerchants(e.target.value)} required />
         </div>
         <Button type="submit" disabled={busy}>
           <KeyRound className="size-4" /> Issue token
         </Button>
-      </form>
+      </form></section>
 
       <section className="space-y-3">
-        <h2 className="font-semibold">Your tokens</h2>
-        {tokens.length === 0 && <p className="text-sm text-muted-foreground">No tokens yet.</p>}
-        <ul className="divide-y rounded-xl border bg-card">
+        <h2 className="section-heading">Your tokens</h2>
+        {tokens.length === 0 && <p className="empty-state"><KeyRound className="size-6 text-primary" />No tokens yet.</p>}
+        <ul className={tokens.length ? "divide-y rounded-md border bg-card" : ""}>
           {tokens.map((t) => {
             const expired = new Date(t.expires_at).getTime() <= now;
             return (
@@ -152,7 +147,7 @@ function Wallet() {
                     {t.label}
                     {t.revoked ? <Badge variant="destructive">Revoked</Badge> : expired ? <Badge variant="secondary">Expired</Badge> : <Badge>Active</Badge>}
                   </div>
-                  <div className="font-mono text-xs text-muted-foreground">
+                  <div className="break-words font-mono text-xs leading-relaxed text-muted-foreground">
                     {t.token_prefix}… · expires {new Date(t.expires_at).toLocaleString()} · {t.merchant_whitelist.join(", ") || "no merchants"}
                   </div>
                 </div>
@@ -168,9 +163,9 @@ function Wallet() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-semibold">Recent agent requests</h2>
-        {requests.length === 0 && <p className="text-sm text-muted-foreground">No requests yet.</p>}
-        <ul className="divide-y rounded-xl border bg-card">
+        <h2 className="section-heading">Recent agent requests</h2>
+        {requests.length === 0 && <p className="empty-state"><Activity className="size-6 text-primary" />No requests yet.</p>}
+        <ul className={requests.length ? "divide-y rounded-md border bg-card" : ""}>
           {requests.map((r) => (
             <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 text-sm">
               <div>
@@ -188,8 +183,8 @@ function Wallet() {
       </section>
 
       <section className="space-y-2">
-        <h2 className="font-semibold">Connect your agent</h2>
-        <pre className="overflow-x-auto rounded-xl border bg-card p-4 font-mono text-xs leading-relaxed">{`curl -X POST ${endpoint} \\
+        <h2 className="section-heading">Connect your agent</h2>
+        <pre className="overflow-x-auto rounded-md border bg-card p-4 font-mono text-xs leading-relaxed">{`curl -X POST ${endpoint} \\
   -H "Authorization: Bearer apt_..." \\
   -H "Idempotency-Key: order-1234" \\
   -H "Content-Type: application/json" \\

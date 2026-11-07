@@ -111,7 +111,7 @@ export function DeliveryPanel({ r }: { r: DeliveryRequest }) {
   const needsNewUpload = onHold && (!latest || latest.ai_verdict === "rejected");
 
   return (
-    <div className="space-y-3 rounded-lg border bg-background p-4">
+    <div className="space-y-4 border-t pt-5">
       <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         <FileText className="size-3.5" /> Delivery
       </div>
@@ -185,6 +185,7 @@ export function DeliveryPanel({ r }: { r: DeliveryRequest }) {
             <Button
               variant="outline"
               size="sm"
+              aria-label="Copy delivery link" title="Copy delivery link"
               onClick={async () => {
                 await navigator.clipboard.writeText(newLink);
                 setCopied(true);

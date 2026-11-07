@@ -1,3 +1,4 @@
+import { PublicFrame } from "@/components/public-frame";
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
@@ -66,12 +67,12 @@ function DeliverPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-start justify-center bg-background px-6 py-16">
+    <PublicFrame>
       <div className="w-full max-w-lg space-y-6">
-        <div className="text-sm font-semibold tracking-tight text-muted-foreground">Payrail · delivery</div>
+        <div><span className="eyebrow">PRIVATE MERCHANT DELIVERY</span><h1 className="page-heading mt-3">Deliver your work.</h1></div>
 
         {info.state !== "active" && !result ? (
-          <div className="rounded-xl border bg-card p-6">
+          <div className="rounded-md border bg-card p-6">
             <div className="flex items-start gap-3">
               <XCircle className="mt-0.5 size-5 shrink-0 text-destructive" />
               <p className="text-sm">{STATE_COPY[info.state] ?? STATE_COPY["not_found"]}</p>
@@ -79,10 +80,10 @@ function DeliverPage() {
           </div>
         ) : (
           <>
-            <div className="space-y-4 rounded-xl border bg-card p-6">
+            <div className="space-y-4 border-y py-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h1 className="text-xl font-bold tracking-tight">{info.vendorName}</h1>
+                  <h2 className="text-xl font-semibold">{info.vendorName}</h2>
                   <p className="mt-1 text-sm text-muted-foreground">{info.description}</p>
                 </div>
                 {info.amountCents != null && (
@@ -107,7 +108,7 @@ function DeliverPage() {
             {result ? (
               <ResultCard result={result} />
             ) : (
-              <form onSubmit={onSubmit} className="space-y-4 rounded-xl border bg-card p-6">
+              <form onSubmit={onSubmit} className="space-y-4 border-y py-6">
                 <label className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed px-4 py-8 text-center hover:bg-muted/50">
                   <Upload className="size-6 text-muted-foreground" />
                   <span className="text-sm font-medium">{file ? file.name : "Choose your file"}</span>
@@ -144,7 +145,7 @@ function DeliverPage() {
           </>
         )}
       </div>
-    </main>
+    </PublicFrame>
   );
 }
 
@@ -167,7 +168,7 @@ function ResultCard({ result }: { result: Result }) {
         ? "The buyer has been told. They may send you a new link to try again."
         : "The automatic check couldn't decide, so the buyer will look at it themselves.";
   return (
-    <div className="space-y-2 rounded-xl border bg-card p-6">
+    <div className="space-y-2 rounded-md border bg-card p-6">
       <div className="flex items-center gap-2 font-semibold">
         {accepted ? <CheckCircle2 className="size-5 text-primary" /> : rejected ? <XCircle className="size-5 text-destructive" /> : <Clock className="size-5 text-muted-foreground" />}
         {title}

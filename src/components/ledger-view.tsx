@@ -35,13 +35,13 @@ export function LedgerView({ mode }: { mode: "history" | "ledger" }) {
     ...(selected.transactions?.audit_timeline ?? []).map(e => ({ id: e.id, created_at: e.created_at, actor: e.actor, title: e.title, detail: e.detail, metadata: e.metadata })),
   ].sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id)) : [];
   const Icon = mode === "history" ? History : ReceiptText;
-  return <main className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
+  return <main className="app-main space-y-7">
     <div className="flex flex-wrap items-center justify-between gap-4">
-      <div className="flex items-center gap-3"><Icon className="size-6 text-primary" /><h1 className="text-2xl font-bold">{mode === "history" ? "Payment history" : "Ledger"}</h1></div>
+      <div><span className="eyebrow">{mode === "history" ? "EVERY DECISION, RECORDED" : "A CLEAR VIEW OF YOUR MONEY"}</span><h1 className="page-heading mt-3">{mode === "history" ? "Payment history" : "Ledger"}</h1><p className="mt-3 text-sm text-muted-foreground">{mode === "history" ? "The complete trail, from agent request to final decision." : "Authorization holds, confirmed payments, and released funds."}</p></div>
       <Button variant="outline" size="sm" onClick={exportRows} disabled={!visible.length}><Download className="size-4" />Export CSV</Button>
     </div>
-    {mode === "ledger" && <div className="grid grid-cols-2 gap-5 border-y py-5 sm:grid-cols-4">
-      {[ ["On hold", totals.held], ["Confirmed payments", totals.paid], ["Holds released", totals.released], ["Capture unconfirmed", totals.unconfirmed] ].map(([label, amount]) => <div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 font-mono text-xl font-semibold">{money(Number(amount))}</p></div>)}
+    {mode === "ledger" && <div className="grid grid-cols-2 gap-5 border-y bg-card px-5 py-7 sm:grid-cols-4">
+      {[ ["On hold", totals.held], ["Confirmed payments", totals.paid], ["Holds released", totals.released], ["Capture unconfirmed", totals.unconfirmed] ].map(([label, amount]) => <div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 font-display text-2xl font-semibold tabular-nums">{money(Number(amount))}</p></div>)}
     </div>}
     <div className="flex flex-wrap items-center gap-3">
       <div className="relative min-w-0 flex-1"><Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" /><Input className="pl-9" aria-label="Search payments" placeholder="Search merchant or request" value={search} onChange={e => setSearch(e.target.value)} /></div>
@@ -51,9 +51,9 @@ export function LedgerView({ mode }: { mode: "history" | "ledger" }) {
       {(search || status !== "all") && <Button variant="ghost" size="icon" aria-label="Clear filters" onClick={() => { setSearch(""); setStatus("all"); }}><X className="size-4" /></Button>}
     </div>
     <div className="flex justify-between text-xs text-muted-foreground"><span>{visible.length} payments</span>{rows.length === 500 && <span>Latest 500 requests</span>}<Badge variant="outline">PayPal Sandbox</Badge></div>
-    {!visible.length ? <div className="border-y py-14 text-center text-muted-foreground"><Icon className="mx-auto mb-3 size-8" /><p>{rows.length ? "No payments match your filters." : "No payment requests yet."}</p></div> : <div className="overflow-x-auto border-y">
+    {!visible.length ? <div className="empty-state min-h-64"><Icon className="mx-auto mb-3 size-8" /><p>{rows.length ? "No payments match your filters." : "No payment requests yet."}</p></div> : <div className="overflow-x-auto border-y">
       <table className="w-full text-left text-sm"><thead className="bg-muted/50 text-xs text-muted-foreground"><tr><th className="px-3 py-3">Created</th><th className="px-3 py-3">Merchant</th><th className="px-3 py-3 text-right">Amount</th><th className="px-3 py-3">Status</th><th className="px-3 py-3"><span className="sr-only">Details</span></th></tr></thead>
-        <tbody>{visible.map(r => <tr key={r.id} className="border-t"><td className="whitespace-nowrap px-3 py-4 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td><td className="min-w-40 px-3 py-4"><p className="font-medium">{r.vendor_name}</p><p className="mt-1 max-w-64 truncate text-xs text-muted-foreground">{r.description}</p></td><td className="whitespace-nowrap px-3 py-4 text-right font-mono">{money(r.amount_cents, r.currency)}</td><td className="px-3 py-4"><Badge variant={statusMeta(r.status).tone}>{statusMeta(r.status).label}</Badge></td><td className="px-3 py-4"><Button variant="ghost" size="icon" aria-label={`View ${r.vendor_name} history`} onClick={() => setSelectedId(r.id)}><ChevronRight className="size-4" /></Button></td></tr>)}</tbody>
+        <tbody>{visible.map(r => <tr key={r.id} className="border-t transition-colors hover:bg-accent/40"><td className="whitespace-nowrap px-3 py-4 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td><td className="min-w-40 px-3 py-4"><p className="font-medium">{r.vendor_name}</p><p className="mt-1 max-w-64 truncate text-xs text-muted-foreground">{r.description}</p></td><td className="whitespace-nowrap px-3 py-4 text-right font-mono">{money(r.amount_cents, r.currency)}</td><td className="px-3 py-4"><Badge variant={statusMeta(r.status).tone}>{statusMeta(r.status).label}</Badge></td><td className="px-3 py-4"><Button variant="ghost" size="icon" aria-label={`View ${r.vendor_name} history`} onClick={() => setSelectedId(r.id)}><ChevronRight className="size-4" /></Button></td></tr>)}</tbody>
       </table>
     </div>}
     <Dialog open={Boolean(selected)} onOpenChange={open => { if (!open) setSelectedId(null); }}><DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-2xl"><DialogHeader><DialogTitle>{selected?.vendor_name} — payment history</DialogTitle></DialogHeader>
