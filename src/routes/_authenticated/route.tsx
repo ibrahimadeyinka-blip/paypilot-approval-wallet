@@ -21,21 +21,23 @@ function AuthedLayout() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-3">
-          <div className="flex items-center gap-6">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-6">
             <Link to="/wallet" className="flex items-center gap-2 font-semibold">
               <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
                 <KeyRound className="size-4" />
               </span>
               Payrail
             </Link>
-            <nav className="flex items-center gap-1">
+            <nav className="flex flex-wrap items-center gap-1">
               <Link to="/wallet" className={navLink} activeProps={{ className: "bg-muted text-foreground" }}>
                 Agent Wallet
               </Link>
               <Link to="/approvals" className={navLink} activeProps={{ className: "bg-muted text-foreground" }}>
                 Approvals
               </Link>
+              <Link to="/history" className={navLink} activeProps={{ className: "bg-muted text-foreground" }}>History</Link>
+              <Link to="/ledger" className={navLink} activeProps={{ className: "bg-muted text-foreground" }}>Ledger</Link>
             </nav>
           </div>
           <Button
