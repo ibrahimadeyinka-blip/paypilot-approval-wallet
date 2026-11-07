@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_drafts: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          id: string
+          owner_id: string
+          ready: boolean
+          token_id: string | null
+        }
+        Insert: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          owner_id?: string
+          ready?: boolean
+          token_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          owner_id?: string
+          ready?: boolean
+          token_id?: string | null
+        }
+        Relationships: []
+      }
       agent_history: {
         Row: {
           actor: string

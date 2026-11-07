@@ -6,6 +6,7 @@ import { z } from "zod";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { completePaypalReturn } from "@/lib/agent/approvals.functions";
+import { track } from "@/lib/analytics";
 
 const searchSchema = z.object({
   token: z.string().optional(),
@@ -42,7 +43,7 @@ function PaypalReturn() {
       return;
     }
     complete({ data: { orderId: token, cancelled: cancelled !== undefined } })
-      .then(setResult)
+      .then((r) => { if (r.status === "authorized") track("project.agent_request_approved", {}); setResult(r); })
       .catch(() => setResult({ status: "error", message: "We couldn't confirm with PayPal. Go back to Approvals and press \"check now\"." }));
   }, [token, cancelled, complete]);
 

@@ -1,40 +1,118 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, KeyRound, ShieldCheck, ScanLine, ReceiptText, LockKeyhole, Check, GitBranch } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, ArrowUpRight, Check, KeyRound, ScanLine, ShieldCheck, X, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PayrailBrand } from "@/components/payrail-brand";
-import infrastructure from "@/assets/payrail-infrastructure.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
-    { title: "Payrail — Payments for agents. Control for you." },
-    { name: "description", content: "Guarded AI agent payments with revocable tokens, spending limits, owner approval, and delivery review." },
-    { property: "og:title", content: "Payrail — Payments for agents. Control for you." },
-    { property: "og:description", content: "Your agents can transact. You stay in control, from request to delivery." },
+    { title: "Payrail — Let AI agents pay. On your rails." },
+    { name: "description", content: "Give AI agents a spending token with your own caps, budgets and approved merchants. You approve, PayPal holds, AI checks the work, then it pays." },
+    { property: "og:title", content: "Payrail — Let AI agents pay. On your rails." },
+    { property: "og:description", content: "Spending tokens, owner approval, PayPal holds and delivery review for AI agents." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
   ] }), component: Index,
 });
-const capabilities = [
-  { icon: KeyRound, number: "01", title: "Permission, not access.", body: "Give each agent a limited token, not your payment credentials. Set its lifetime and revoke it whenever you need.", detail: "1, 7 or 30-day tokens" },
-  { icon: ShieldCheck, number: "02", title: "Your budget. Your boundaries.", body: "Only approved merchants. A hard cap on every request. You decide before PayPal places an authorization hold.", detail: "$100 per payment · $500 per rolling day" },
-  { icon: ScanLine, number: "03", title: "Delivery before payment.", body: "Merchants deliver through a private link. AI reviews the work; unclear results come back to you before capture.", detail: "Private delivery · Conditional capture" },
-];
+
+const DIRECTIVE = "Find a contractor to design a minimalist blue tech logo. Budget is $100.";
+const ticker = [
+  ["design-studio.co", "$100.00", "held"], ["figma.com", "$15.00", "paid"], ["upwork.com", "$240.00", "blocked · over cap"],
+  ["copy-desk.io", "$45.00", "awaiting delivery"], ["unknown-shop.xyz", "$9.99", "blocked · not approved"], ["aws.amazon.com", "$32.10", "paid"],
+  ["fiverr.com", "$60.00", "in review"], ["notion.so", "$10.00", "paid"],
+] as const;
+
+function useTyped(text: string, speed = 32) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (n >= text.length) { const t = setTimeout(() => setN(0), 5200); return () => clearTimeout(t); }
+    const t = setTimeout(() => setN(n + 1), speed);
+    return () => clearTimeout(t);
+  }, [n, text, speed]);
+  return { shown: text.slice(0, n), done: n >= text.length };
+}
+
 function Index() {
-  return <main className="bg-background">
-    <header className="mx-auto flex h-24 max-w-7xl items-center justify-between gap-4 px-6 lg:px-10">
-      <Link to="/" aria-label="Payrail home"><PayrailBrand /></Link>
-      <nav className="hidden items-center gap-7 text-sm text-muted-foreground md:flex"><a href="#guardrails" className="hover:text-primary">The guardrails</a><a href="#workflow" className="hover:text-primary">How it works</a><Link to="/ledger" className="hover:text-primary">Payment ledger</Link></nav>
-      <div className="flex items-center gap-3"><Button asChild variant="ghost" className="hidden sm:inline-flex"><Link to="/auth">Sign in</Link></Button><Button asChild><Link to="/wallet">Open wallet <ArrowUpRight /></Link></Button></div>
+  const { shown, done } = useTyped(DIRECTIVE);
+  return <main className="overflow-x-hidden bg-background">
+    <header className="sticky top-0 z-30 border-b border-transparent bg-background/80 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
+        <Link to="/" aria-label="Payrail home"><PayrailBrand /></Link>
+        <nav className="hidden items-center gap-7 text-sm text-muted-foreground md:flex"><a href="#how" className="hover:text-foreground">How it works</a><a href="#guardrails" className="hover:text-foreground">Guardrails</a><Link to="/analytics" className="hover:text-foreground">Analytics</Link></nav>
+        <div className="flex items-center gap-2"><Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex"><Link to="/auth">Sign in</Link></Button><Button asChild size="sm"><Link to="/wallet">Open wallet</Link></Button></div>
+      </div>
     </header>
-    <section className="relative isolate overflow-hidden border-y">
-      <img src={infrastructure} alt="Emerald glass and stainless steel rails representing guarded payment infrastructure" width={1920} height={1024} className="hero-image absolute inset-0 -z-10 h-full w-full object-cover object-[62%_center] opacity-35 sm:object-center sm:opacity-100" />
-      <div className="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-10 lg:py-28">
-        <div className="animate-enter max-w-xl"><span className="eyebrow">BUILT FOR THE AGENT ECONOMY</span><h1 className="mt-7 font-display text-[50px] font-medium leading-[1.05] sm:text-[66px]">Payrail.<br />Payments for agents.<br /><span className="text-primary">Control for you.</span></h1><p className="mt-7 max-w-[420px] text-base leading-relaxed text-muted-foreground sm:text-lg">Let your agents get things done. Keep every payment inside your rules, from the first request to the finished work.</p><div className="mt-8 flex flex-wrap items-center gap-4"><Button asChild size="lg"><Link to="/wallet">Open Agent Wallet <ArrowUpRight /></Link></Button><Button asChild variant="ghost"><a href="#workflow">Explore the flow <ArrowRight /></a></Button></div><div className="mt-10 flex flex-wrap items-center gap-5 text-xs text-muted-foreground"><span className="flex items-center gap-1.5"><LockKeyhole className="size-3.5" /> Your credentials stay yours</span><span className="flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-primary" /> PayPal Sandbox</span></div></div>
+
+    <section className="relative">
+      <div className="paper-grid pointer-events-none absolute inset-0 -z-0 opacity-60" />
+      <div className="relative mx-auto grid max-w-6xl gap-10 px-5 pt-14 sm:px-8 lg:grid-cols-[1.25fr_1fr] lg:pt-20">
+        <div className="stagger">
+          <span className="eyebrow">Agent payments · PayPal Sandbox</span>
+          <h1 className="mt-6 text-[52px] font-bold leading-[0.95] sm:text-[76px]">Let agents pay.<br />On <span className="hl">your rails.</span></h1>
+          <p className="mt-6 max-w-md text-[17px] leading-relaxed text-muted-foreground">Give each AI agent a token with your own limits. It asks, you approve, PayPal holds the money, and it's only paid once the work checks out.</p>
+          <div className="mt-8 flex flex-wrap gap-3"><Button asChild size="lg" className="rounded-full px-6"><Link to="/wallet">Create an agent token <ArrowUpRight /></Link></Button><Button asChild size="lg" variant="outline" className="rounded-full px-6"><Link to="/agent">Try the agent <ArrowRight /></Link></Button></div>
+        </div>
+
+        <div className="animate-enter self-end [animation-delay:250ms]">
+          <div className="rounded-xl border bg-card p-4 shadow-[var(--surface-shadow)]">
+            <div className="flex items-center justify-between border-b pb-3 font-mono text-[10px] text-muted-foreground"><span className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-signal" /> agent · design-bot</span><span>$150 cap · 7 days</span></div>
+            <div className="mt-4 flex gap-3"><span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-semibold text-ink-foreground">YOU</span><p className={`text-[15px] leading-snug ${done ? "" : "caret"}`}>{shown}</p></div>
+            <div className={`mt-4 space-y-2 transition-all duration-700 ${done ? "opacity-100" : "translate-y-2 opacity-0"}`}>
+              <div className="flex gap-3"><span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-highlight"><Bot className="size-3.5 text-highlight-foreground" /></span>
+                <div className="flex-1 rounded-lg border border-dashed p-3 text-sm"><div className="flex justify-between"><span className="font-medium">design-studio.co</span><span className="font-mono">$100.00</span></div><p className="mt-1 text-xs text-muted-foreground">Minimalist blue tech logo · PNG + SVG</p></div></div>
+              {[["Approved merchant", true], ["Under $150 cap", true], ["Inside 24h budget", true]].map(([l]) => <div key={l as string} className="ml-10 flex items-center gap-2 font-mono text-[11px] text-muted-foreground"><Check className="size-3 text-signal" /> {l}</div>)}
+              <div className="ml-10 flex items-center justify-between rounded-md bg-ink px-3 py-2 text-xs text-ink-foreground"><span>Waiting for your approval</span><span className="font-mono text-highlight">HOLD · $100</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mask-x relative mt-16 overflow-hidden border-y bg-card/60 py-3.5" aria-label="Example agent activity">
+        <div className="marquee gap-10 pr-10">{[...ticker, ...ticker].map(([m, a, s], i) => <span key={i} className="flex shrink-0 items-center gap-2.5 font-mono text-xs"><span className={`size-1.5 rounded-full ${s.startsWith("blocked") ? "bg-destructive" : s === "paid" ? "bg-signal" : "bg-warning"}`} /><span className="font-semibold text-foreground">{m}</span><span className="text-muted-foreground">{a}</span><span className={s.startsWith("blocked") ? "text-destructive" : "text-signal"}>{s}</span></span>)}</div>
       </div>
     </section>
-    <section className="border-b"><div className="mx-auto grid max-w-7xl grid-cols-2 divide-x px-6 py-7 text-sm sm:grid-cols-4 lg:px-10">{["Scoped agent tokens", "Server-enforced limits", "Owner approval", "Delivery review"].map(t => <div key={t} className="flex items-center justify-center gap-2 px-2 py-2"><Check className="size-3.5 shrink-0 text-primary" /><span>{t}</span></div>)}</div></section>
-    <section id="guardrails" className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-24"><div className="flex flex-wrap items-end justify-between gap-6"><div><span className="eyebrow">AUTONOMY WITHOUT THE GUESSWORK</span><h2 className="mt-5 max-w-xl text-3xl font-medium leading-tight sm:text-[42px]">Everything an agent needs.<br />Nothing you didn’t allow.</h2></div><p className="max-w-xs text-sm leading-relaxed text-muted-foreground">A clear boundary between what your agent can request and what actually gets paid.</p></div><div className="mt-12 grid border-t md:grid-cols-3">{capabilities.map(c => <article key={c.number} className="border-b py-8 md:border-b-0 md:border-r md:px-7 md:first:pl-0 md:last:border-r-0 md:last:pr-0"><div className="flex items-center justify-between"><c.icon className="size-6 text-primary" /><span className="font-mono text-xs text-muted-foreground">/{c.number}</span></div><h3 className="mt-8 text-xl font-semibold">{c.title}</h3><p className="mt-4 text-sm leading-7 text-muted-foreground">{c.body}</p><p className="mt-7 border-t pt-4 font-mono text-[11px] text-primary">{c.detail}</p></article>)}</div></section>
-    <section id="workflow" className="border-y bg-muted/50"><div className="mx-auto max-w-7xl px-6 py-20 lg:px-10"><span className="eyebrow">FROM INTENT TO RECEIPT</span><div className="mt-5 flex flex-wrap items-end justify-between gap-4"><h2 className="text-3xl font-medium sm:text-[42px]">One payment. A clear path.</h2><Button asChild variant="outline"><Link to="/approvals">View approvals <ArrowUpRight /></Link></Button></div><div className="mt-12 grid gap-0 sm:grid-cols-4">{[{ icon: GitBranch, title: "Agent requests", body: "Merchant, amount, and source evidence." }, { icon: ShieldCheck, title: "You approve", body: "Policy checks, then an authorization hold." }, { icon: ScanLine, title: "Work is reviewed", body: "Private delivery checked against requirements." }, { icon: ReceiptText, title: "Payment recorded", body: "Conditional capture and a complete audit trail." }].map((s,i) => <div key={s.title} className="relative border-t py-7 sm:pr-6"><div className="flex items-center justify-between"><span className="flex size-11 items-center justify-center rounded-md border bg-card"><s.icon className="size-5 text-primary" /></span><span className="font-mono text-xs text-muted-foreground">0{i+1}</span></div><h3 className="mt-6 text-base font-semibold">{s.title}</h3><p className="mt-2 max-w-56 text-sm leading-relaxed text-muted-foreground">{s.body}</p></div>)}</div></div></section>
-    <section className="bg-primary text-primary-foreground"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-8 px-6 py-16 lg:px-10"><div><p className="font-mono text-xs opacity-70">YOUR AGENTS. YOUR RULES.</p><h2 className="mt-4 text-3xl font-medium sm:text-[42px]">Put your agents on the right rails.</h2></div><Button asChild size="lg" variant="highlight"><Link to="/wallet">Open your wallet <ArrowUpRight /></Link></Button></div></section>
-    <footer className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-6 px-6 py-9 lg:px-10"><Link to="/"><PayrailBrand /></Link><p className="text-xs text-muted-foreground">Guarded payments for AI agents.</p><Button asChild variant="ghost" size="sm"><Link to="/auth">Sign in <ArrowUpRight /></Link></Button></footer>
+
+    <section id="how" className="mx-auto max-w-6xl px-5 py-24 sm:px-8">
+      <div className="flex flex-wrap items-end justify-between gap-6"><div><span className="font-mono text-xs text-muted-foreground">01 / HOW IT WORKS</span><h2 className="mt-4 max-w-lg text-4xl font-bold leading-[1.02] sm:text-5xl">From a sentence to a safe payment.</h2></div><p className="max-w-xs text-sm text-muted-foreground">Five steps. Money only moves on the last one.</p></div>
+      <ol className="mt-12 grid gap-px overflow-hidden rounded-xl border bg-border sm:grid-cols-5">
+        {[["Set up", "Create a token with your own caps, budget, merchants and expiry."], ["Ask", "Tell the agent what you need and the budget."], ["Approve", "Checks pass, you approve, PayPal places a hold."], ["Deliver", "The contractor uploads work through a private link."], ["Release", "AI checks it against your brief, then pays."]].map(([t, b], i) =>
+          <li key={t} className="lift group bg-card p-6"><span className="font-mono text-[11px] text-muted-foreground">0{i + 1}</span><h3 className="mt-10 text-xl font-semibold">{t}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{b}</p><div className="mt-6 h-0.5 w-6 bg-foreground transition-all duration-500 group-hover:w-full group-hover:bg-signal" /></li>)}
+      </ol>
+    </section>
+
+    <section id="guardrails" className="bg-ink text-ink-foreground">
+      <div className="mx-auto grid max-w-6xl gap-12 px-5 py-24 sm:px-8 lg:grid-cols-2">
+        <div><span className="font-mono text-xs opacity-60">02 / GUARDRAILS</span><h2 className="mt-4 text-4xl font-bold leading-[1.02] sm:text-5xl">Built so agents <span className="text-highlight">can't overspend.</span></h2><p className="mt-6 max-w-md opacity-70">Every limit is yours to set, and every one is checked on our servers before a cent is held. A leaked or confused agent can't talk its way past them.</p>
+          <div className="mt-10 grid grid-cols-3 gap-px overflow-hidden rounded-lg bg-ink-foreground/10">{[[KeyRound, "Expiring tokens"], [ShieldCheck, "Your caps"], [ScanLine, "Work reviewed"]].map(([I, l]) => { const Icon = I as typeof KeyRound; return <div key={l as string} className="bg-ink p-4"><Icon className="size-5 text-highlight" /><p className="mt-6 text-sm">{l as string}</p></div>; })}</div>
+        </div>
+        <div className="space-y-2 font-mono text-[13px]">
+          {[["design-studio.co", "$100.00", "pass", "Approved merchant, under cap"], ["upwork.com", "$240.00", "block", "Over this token's $150 cap"], ["unknown-shop.xyz", "$9.99", "block", "Not on your approved list"], ["fiverr.com", "$60.00", "block", "Would pass the 24h budget"], ["copy-desk.io", "$45.00", "pass", "Held, waiting for delivery"]].map(([m, a, r, why], i) =>
+            <div key={m} className="animate-enter flex items-center gap-4 rounded-lg border border-ink-foreground/10 px-4 py-3.5" style={{ animationDelay: `${i * 90}ms` }}>
+              <span className={`flex size-6 shrink-0 items-center justify-center rounded-full ${r === "pass" ? "bg-highlight text-highlight-foreground" : "bg-destructive text-destructive-foreground"}`}>{r === "pass" ? <Check className="size-3.5" /> : <X className="size-3.5" />}</span>
+              <span className="min-w-0 flex-1"><span className="block truncate">{m}</span><span className="block truncate text-[11px] opacity-50">{why}</span></span><span>{a}</span>
+            </div>)}
+        </div>
+      </div>
+    </section>
+
+    <section className="mx-auto max-w-6xl px-5 py-24 text-center sm:px-8">
+      <span className="font-mono text-xs text-muted-foreground">03 / START</span>
+      <h2 className="mx-auto mt-4 max-w-2xl text-4xl font-bold leading-[1.02] sm:text-6xl">Your agents. <span className="hl">Your rules.</span></h2>
+      <div className="mt-9 flex justify-center gap-3"><Button asChild size="lg" className="rounded-full px-7"><Link to="/wallet">Open your wallet <ArrowUpRight /></Link></Button></div>
+    </section>
+
+    <footer className="bg-ink px-5 pb-14 pt-16">
+      <div className="receipt mx-auto max-w-2xl px-8 py-10 text-center sm:px-14">
+        <div className="flex justify-center"><PayrailBrand /></div>
+        <p className="mx-auto mt-3 max-w-sm text-sm text-muted-foreground">Guarded payments for AI agents. Owners approve every hold in PayPal.</p>
+        <div className="mt-8 grid grid-cols-3 gap-4 border-y border-dashed py-6 text-left text-sm">
+          <div><p className="font-mono text-[10px] text-muted-foreground">OWNERS</p><Link to="/wallet" className="mt-2 block hover:text-signal">Agent wallet</Link><Link to="/approvals" className="mt-1 block hover:text-signal">Approvals</Link></div>
+          <div><p className="font-mono text-[10px] text-muted-foreground">AGENTS</p><Link to="/agent" className="mt-2 block hover:text-signal">Agent chat</Link><Link to="/analytics" className="mt-1 block hover:text-signal">Analytics</Link></div>
+          <div><p className="font-mono text-[10px] text-muted-foreground">RECORDS</p><Link to="/ledger" className="mt-2 block hover:text-signal">Ledger</Link><Link to="/history" className="mt-1 block hover:text-signal">History</Link></div>
+        </div>
+        <p className="mt-7 font-mono text-[11px] tracking-[0.3em]">THANK YOU FOR PAYING SAFELY</p>
+        <div className="barcode mx-auto mt-4 w-48" aria-hidden />
+        <p className="mt-3 font-mono text-[10px] text-muted-foreground">PayPal Sandbox only · no live money</p>
+      </div>
+    </footer>
   </main>;
 }

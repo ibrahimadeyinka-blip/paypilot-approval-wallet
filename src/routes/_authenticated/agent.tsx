@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { agentTokensQuery } from "@/lib/agent/tokens";
 import { draftDirective, submitDirective } from "@/lib/agent/directive.functions";
 import type { DirectiveDraft } from "@/lib/agent/directive";
+import { track } from "@/lib/analytics";
 
 export const Route = createFileRoute("/_authenticated/agent")({
   head: () => ({
@@ -49,6 +50,8 @@ function AgentChat() {
     setMsgs(next); setInput(""); setBusy(true);
     try {
       const d = await draft({ data: { tokenId, messages: next.map(({ role, content }) => ({ role, content })) } });
+      track("project.agent_request_drafted", { ready: d.ready, amount_cents: d.amount_cents });
+      qc.invalidateQueries({ queryKey: ["agent_analytics"] });
       setMsgs([...next, { role: "assistant", content: d.ready ? `I'll hire ${d.vendor_name} for ${money(d.amount_cents)}. Confirm to send it for your approval.` : d.question, draft: d.ready ? d : undefined }]);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Something went wrong");
@@ -61,6 +64,8 @@ function AgentChat() {
       const directive = msgs.filter((m) => m.role === "user").map((m) => m.content).join("\n");
       const r = await submit({ data: { tokenId, directive, ...d } });
       setSent(i);
+      track(r.status === "blocked" ? "project.agent_request_blocked" : "project.agent_request_sent", { amount_cents: d.amount_cents });
+      qc.invalidateQueries({ queryKey: ["agent_analytics"] });
       qc.invalidateQueries({ queryKey: ["agent_payment_requests"] });
       setMsgs((m) => [...m, { role: "assistant", content: r.status === "blocked" ? `Blocked by your safeguards: ${r.reason ?? "limit reached"}. No money moved.` : "Sent. It's waiting in Approvals — approve it to place the PayPal hold." }]);
     } catch (e) {
