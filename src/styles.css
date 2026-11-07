@@ -214,7 +214,7 @@
   --color-ink: var(--ink);
   --color-ink-foreground: var(--ink-foreground);
 }
-body { font-family: var(--font-sans); font-feature-settings: "ss01", "tnum"; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
 h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.035em; }
 .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-foreground); }
 .eyebrow::before { content: ""; width: 6px; height: 6px; background: var(--signal); border-radius: 50%; box-shadow: 0 0 0 3px color-mix(in oklab, var(--signal) 22%, transparent); animation: pulse-dot 2.4s ease-in-out infinite; }
