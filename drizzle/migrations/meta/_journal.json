@@ -1,5 +1,13 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1794034405411,
+      "tag": "0000_agent_history_ledger",
+      "breakpoints": true
+    }
+  ]
 }

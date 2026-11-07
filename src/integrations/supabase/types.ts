@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_history: {
+        Row: {
+          actor: string
+          created_at: string
+          detail: string | null
+          event: string
+          from_status: string | null
+          id: string
+          metadata: Json
+          owner_id: string
+          request_id: string
+          to_status: string
+        }
+        Insert: {
+          actor: string
+          created_at?: string
+          detail?: string | null
+          event: string
+          from_status?: string | null
+          id?: string
+          metadata?: Json
+          owner_id: string
+          request_id: string
+          to_status: string
+        }
+        Update: {
+          actor?: string
+          created_at?: string
+          detail?: string | null
+          event?: string
+          from_status?: string | null
+          id?: string
+          metadata?: Json
+          owner_id?: string
+          request_id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_history_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_history_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "agent_payment_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_payment_requests: {
         Row: {
           amount_cents: number
