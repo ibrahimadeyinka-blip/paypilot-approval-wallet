@@ -1,0 +1,20 @@
+{
+  "source": "bolt",
+  "app": "Payrail escrow marketplace",
+  "capabilities": [
+    {"capability": "code: screens (orders, chats, trade chat, transaction detail, agent wallet, approvals, audit ledger, settings, auth, onboarding)", "source": "src/screens, src/components", "outcome": "migrate", "status": "in_progress", "next_action": "port to TanStack routes"},
+    {"capability": "theme: warm stone + teal palette, Inter/JetBrains Mono, component classes", "source": "tailwind.config.js, src/index.css", "outcome": "migrate", "status": "in_progress", "next_action": "port to Tailwind v4 tokens in src/styles.css"},
+    {"capability": "schema: profiles, transactions, escrow_events, deliverables, audit_timeline, products, conversations, messages, agent_tokens, agent_payment_requests + RLS", "source": "supabase/migrations (4 files)", "outcome": "migrate", "status": "in_progress", "next_action": "recreate in Lovable Cloud"},
+    {"capability": "database functions: respond_to_order, advance_transaction, decide_agent_payment, updated_at triggers", "source": "supabase/migrations", "outcome": "migrate", "status": "in_progress", "next_action": "recreate in Lovable Cloud"},
+    {"capability": "records: application table rows", "source": "none attached", "outcome": "migrate", "status": "pending", "next_action": "request Bolt Data export after preview"},
+    {"capability": "auth identities: Supabase Auth email/password users", "source": "none attached", "outcome": "migrate", "status": "pending", "next_action": "request user export (emails + original ids) after preview; first-login password setup flow"},
+    {"capability": "authorization: RLS ownership (auth.uid()), buyer/seller participant scoping", "source": "supabase/migrations", "outcome": "migrate", "status": "in_progress", "next_action": "recreate policies"},
+    {"capability": "public endpoint: agent-gateway (token-hash auth, guardrails, service role insert)", "source": "supabase/functions/agent-gateway", "outcome": "migrate", "status": "in_progress", "next_action": "recreate as public server route /api/public/agent-gateway"},
+    {"capability": "storage: deliverables.storage_path (table unused by app, no bucket code)", "source": "schema only", "outcome": "migrate", "status": "in_progress", "next_action": "keep table; no file bytes to move"},
+    {"capability": "external providers: PayPal (simulated sandbox only, no API calls)", "source": "UI copy", "outcome": "preserve", "status": "in_progress", "next_action": "keep simulated behavior"},
+    {"capability": "AI: rule-based order source check (no model calls)", "source": "src/lib/aiEngine.ts", "outcome": "preserve", "status": "in_progress", "next_action": "port as-is"},
+    {"capability": "secrets", "source": "VITE_SUPABASE_*, SUPABASE_SERVICE_ROLE_KEY (old backend only)", "outcome": "replace", "status": "verified", "next_action": "none - replaced by Lovable Cloud; no user secrets needed"},
+    {"capability": "cutover: agent-gateway URL changes for external agents", "source": "supabase/functions/agent-gateway", "outcome": "migrate", "status": "pending", "next_action": "tell user the new URL"},
+    {"capability": "verification", "source": "-", "outcome": "verify", "status": "pending", "next_action": "build, sign-in flow, CRUD, gateway call"}
+  ]
+}
