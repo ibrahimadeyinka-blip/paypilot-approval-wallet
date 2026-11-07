@@ -66,7 +66,7 @@ async function authed(path: string, method: string, requestId: string, body?: un
       Prefer: "return=representation",
       "PayPal-Request-Id": requestId,
     },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: body === undefined ? null : JSON.stringify(body),
   });
 }
 

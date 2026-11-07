@@ -7,7 +7,7 @@ const OWNER = "22222222-2222-4222-8222-222222222222";
 const urls = { returnUrl: "https://app.test/paypal/return", cancelUrl: "https://app.test/paypal/return?cancelled=1" };
 
 function makeDeps(rpcResults: Record<string, unknown>, paypal: Partial<PaypalPort> = {}) {
-  const rpc = vi.fn(async (fn: string) => rpcResults[fn]);
+  const rpc = vi.fn(async (fn: string, _args: Record<string, unknown>) => rpcResults[fn]);
   const pp: PaypalPort = {
     createOrder: vi.fn(async () => ({ orderId: "ORDER123ABC", approveUrl: "https://sandbox.paypal.com/approve" })),
     authorizeOrder: vi.fn(async () => ({ authorizationId: "AUTH1", status: "CREATED", expiresAt: "2026-12-01T00:00:00Z" })),
