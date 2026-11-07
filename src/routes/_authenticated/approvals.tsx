@@ -7,7 +7,8 @@ import { AlertTriangle, ExternalLink, Quote, RefreshCw, ShieldCheck, X } from "l
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { approvalsQuery } from "@/lib/agent/tokens";
-import { NEEDS_ACTION, statusMeta } from "@/lib/agent/status";
+import { HAS_DELIVERY, NEEDS_ACTION, ON_HOLD, statusMeta } from "@/lib/agent/status";
+import { DeliveryPanel } from "@/components/delivery-panel";
 import { approveAgentRequest, confirmAgentAuthorization, declineAgentRequest } from "@/lib/agent/approvals.functions";
 
 export const Route = createFileRoute("/_authenticated/approvals")({
@@ -34,7 +35,8 @@ const when = (s: string | null) => (s ? new Date(s).toLocaleString() : "—");
 function Approvals() {
   const requests = useApprovals();
   const open = requests.filter((r) => NEEDS_ACTION.has(r.status));
-  const done = requests.filter((r) => !NEEDS_ACTION.has(r.status));
+  const held = requests.filter((r) => ON_HOLD.has(r.status));
+  const done = requests.filter((r) => !NEEDS_ACTION.has(r.status) && !ON_HOLD.has(r.status));
 
   return (
     <main className="mx-auto max-w-5xl space-y-8 px-6 py-8">
@@ -50,6 +52,18 @@ function Approvals() {
         <h2 className="font-semibold">Needs your decision ({open.length})</h2>
         {open.length === 0 && <p className="text-sm text-muted-foreground">You're all caught up.</p>}
         {open.map((r) => (
+          <RequestCard key={r.id} r={r} />
+        ))}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-semibold">Funds on hold — waiting for delivery ({held.length})</h2>
+        <p className="text-sm text-muted-foreground">
+          Send the merchant a private upload link. Their file is reviewed by AI against your requirements; payment is
+          released only if it clearly matches. Anything unclear comes back to you.
+        </p>
+        {held.length === 0 && <p className="text-sm text-muted-foreground">Nothing on hold.</p>}
+        {held.map((r) => (
           <RequestCard key={r.id} r={r} />
         ))}
       </section>
@@ -178,16 +192,15 @@ function RequestCard({ r }: { r: Req }) {
               : "PayPal hasn't confirmed the order yet. Press Approve again — it won't create a second payment."}
           </Notice>
         )}
-        {r.status === "authorized" && (
-          <Notice tone="success" title="Funds on hold with PayPal Sandbox">
-            Authorization <span className="font-mono">{r.paypal_authorization_id}</span>
-            {r.paypal_authorization_status ? ` (${r.paypal_authorization_status.toLowerCase()})` : ""} · order{" "}
+        {r.paypal_authorization_id && (
+          <p className="text-xs text-muted-foreground">
+            PayPal Sandbox authorization <span className="font-mono">{r.paypal_authorization_id}</span> · order{" "}
             <span className="font-mono">{r.paypal_order_id}</span>
-            {r.paypal_authorization_expires_at ? ` · expires ${when(r.paypal_authorization_expires_at)}` : ""}. Nothing is
-            captured until the delivery is reviewed.
-          </Notice>
+            {r.paypal_authorization_expires_at ? ` · hold expires ${when(r.paypal_authorization_expires_at)}` : ""}
+          </p>
         )}
-        {r.decided_at && r.status !== "blocked" && (
+        {HAS_DELIVERY.has(r.status) && <DeliveryPanel r={r} />}
+        {r.decided_at && r.status !== "blocked" && !HAS_DELIVERY.has(r.status) && (
           <p className="text-xs text-muted-foreground">
             {r.approved_at ? `You approved on ${when(r.approved_at)}` : `Decided on ${when(r.decided_at)}`}
           </p>
