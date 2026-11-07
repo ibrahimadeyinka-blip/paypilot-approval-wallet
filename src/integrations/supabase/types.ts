@@ -17,53 +17,83 @@ export type Database = {
       agent_payment_requests: {
         Row: {
           amount_cents: number
+          approved_at: string | null
+          authorization_attempt: number
+          authorization_error: string | null
           block_reason: string | null
           created_at: string
           currency: string
           decided_at: string | null
+          decided_by: string | null
           description: string
           id: string
           idempotency_key: string | null
           merchant_handle: string
           owner_id: string
+          paypal_approve_url: string | null
+          paypal_authorization_expires_at: string | null
+          paypal_authorization_id: string | null
+          paypal_authorization_status: string | null
+          paypal_order_id: string | null
           source_context: string
           status: string
           token_id: string
           transaction_id: string | null
+          updated_at: string
           vendor_name: string
         }
         Insert: {
           amount_cents: number
+          approved_at?: string | null
+          authorization_attempt?: number
+          authorization_error?: string | null
           block_reason?: string | null
           created_at?: string
           currency?: string
           decided_at?: string | null
+          decided_by?: string | null
           description?: string
           id?: string
           idempotency_key?: string | null
           merchant_handle?: string
           owner_id: string
+          paypal_approve_url?: string | null
+          paypal_authorization_expires_at?: string | null
+          paypal_authorization_id?: string | null
+          paypal_authorization_status?: string | null
+          paypal_order_id?: string | null
           source_context?: string
           status: string
           token_id: string
           transaction_id?: string | null
+          updated_at?: string
           vendor_name?: string
         }
         Update: {
           amount_cents?: number
+          approved_at?: string | null
+          authorization_attempt?: number
+          authorization_error?: string | null
           block_reason?: string | null
           created_at?: string
           currency?: string
           decided_at?: string | null
+          decided_by?: string | null
           description?: string
           id?: string
           idempotency_key?: string | null
           merchant_handle?: string
           owner_id?: string
+          paypal_approve_url?: string | null
+          paypal_authorization_expires_at?: string | null
+          paypal_authorization_id?: string | null
+          paypal_authorization_status?: string | null
+          paypal_order_id?: string | null
           source_context?: string
           status?: string
           token_id?: string
           transaction_id?: string | null
+          updated_at?: string
           vendor_name?: string
         }
         Relationships: [
@@ -509,9 +539,50 @@ export type Database = {
         Args: { p_action: string; p_transaction_id: string }
         Returns: undefined
       }
+      agent_budget_statuses: { Args: never; Returns: string[] }
+      agent_request_violation: {
+        Args: {
+          p_req: Database["public"]["Tables"]["agent_payment_requests"]["Row"]
+          p_token: Database["public"]["Tables"]["agent_tokens"]["Row"]
+        }
+        Returns: string
+      }
+      attach_agent_paypal_order: {
+        Args: {
+          p_approve_url: string
+          p_attempt: number
+          p_order_id: string
+          p_request_id: string
+        }
+        Returns: boolean
+      }
+      begin_agent_authorization: {
+        Args: { p_owner_id: string; p_request_id: string }
+        Returns: Json
+      }
+      check_agent_authorization: {
+        Args: { p_order_id: string; p_owner_id: string; p_request_id: string }
+        Returns: Json
+      }
       decide_agent_payment: {
         Args: { p_approve: boolean; p_request_id: string }
         Returns: string
+      }
+      decline_agent_payment: { Args: { p_request_id: string }; Returns: string }
+      fail_agent_authorization: {
+        Args: { p_attempt: number; p_error: string; p_request_id: string }
+        Returns: boolean
+      }
+      record_agent_authorization: {
+        Args: {
+          p_attempt: number
+          p_authorization_id: string
+          p_authorization_status: string
+          p_expires_at: string
+          p_order_id: string
+          p_request_id: string
+        }
+        Returns: Json
       }
       respond_to_order: {
         Args: { p_accept: boolean; p_message_id: string }
