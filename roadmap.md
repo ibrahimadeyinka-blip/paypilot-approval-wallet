@@ -3,5 +3,8 @@
 - [x] Slice 1 — Secure agent wallet and guarded gateway
 - [ ] Slice 2 — Source evidence, owner approval, PayPal Sandbox authorization (built; live PayPal check needs Sandbox keys)
 - [ ] Slice 3 — Deliverable upload, vision review, conditional capture (built; real PayPal capture needs Sandbox keys)
-- [ ] Slice 4 — History log, audit ledger, protected MCP, deployment, end-to-end verification
+- [x] Slice 4 — History log, searchable ledger, CSV export, protected read-only MCP and browser history tool
+- [ ] Slice 4 — Publish deployment (publishing was declined)
+- [ ] Slice 4 — Signed-in history/ledger and OAuth consent checks (needs a confirmed account; remix has no auth users)
+- [ ] Slice 4 — Full PayPal Sandbox end-to-end check (needs Sandbox keys and a confirmed account)
 - [ ] Bring over existing data and users from Bolt (waiting on exports)

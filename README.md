@@ -38,3 +38,4 @@ npm run dev
 - Real payment checks require securely configured `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` for a Sandbox application. Run an authorization, merchant upload, approved review and capture; then a second request with a rejected/uncertain review and owner hold release. Confirm matching PayPal references and history events, retry each step, and verify no duplicate payment. Never use fabricated PayPal references as release evidence.
 - External OAuth checks: connect a client, approve and deny consent, verify expired requests and failed decisions, reject app-session JWTs without an OAuth client claim, and ensure tools only return the connected user's rows.
 - Importing old Bolt users and records still requires their exports; this release does not contain that data.
+- Publishing was declined during this slice, so no hosted deployment was verified. The new MCP catalog is configured but external-client availability remains pending publication.
