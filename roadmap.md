@@ -9,4 +9,5 @@
 - [ ] Slice 4 — Publish deployment (publishing was declined)
 - [ ] Slice 4 — Signed-in history/ledger and OAuth consent checks (needs a confirmed account; remix has no auth users)
 - [ ] Slice 4 — Full PayPal Sandbox end-to-end check (needs Sandbox keys and a confirmed account)
+- [x] Step 2 — In-app Agent Chat turns owner directives into guarded payment requests (signed-in check needs an account)
 - [ ] Bring over existing data and users from Bolt (waiting on exports)
