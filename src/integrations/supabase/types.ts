@@ -23,6 +23,7 @@ export type Database = {
           decided_at: string | null
           description: string
           id: string
+          idempotency_key: string | null
           merchant_handle: string
           owner_id: string
           source_context: string
@@ -39,6 +40,7 @@ export type Database = {
           decided_at?: string | null
           description?: string
           id?: string
+          idempotency_key?: string | null
           merchant_handle?: string
           owner_id: string
           source_context?: string
@@ -55,6 +57,7 @@ export type Database = {
           decided_at?: string | null
           description?: string
           id?: string
+          idempotency_key?: string | null
           merchant_handle?: string
           owner_id?: string
           source_context?: string
@@ -513,6 +516,19 @@ export type Database = {
       respond_to_order: {
         Args: { p_accept: boolean; p_message_id: string }
         Returns: string
+      }
+      submit_agent_payment: {
+        Args: {
+          p_amount_cents: number
+          p_currency: string
+          p_description: string
+          p_idempotency_key: string
+          p_merchant_handle: string
+          p_source_context: string
+          p_token_hash: string
+          p_vendor_name: string
+        }
+        Returns: Json
       }
     }
     Enums: {
