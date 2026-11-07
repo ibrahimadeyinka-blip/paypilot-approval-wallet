@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { sha256Hex, TOKEN_PREFIX } from "./gateway-input";
+import { IN_FLIGHT } from "./status";
 
 export const TOKEN_LIFETIMES = [
   { days: 1, label: "1 day" },
@@ -72,13 +73,17 @@ export const approvalsQuery = queryOptions({
     const { data, error } = await supabase
       .from("agent_payment_requests")
       .select(
-        "id, vendor_name, merchant_handle, amount_cents, currency, description, source_context, status, block_reason, authorization_error, created_at, approved_at, decided_at, paypal_order_id, paypal_approve_url, paypal_authorization_id, paypal_authorization_status, paypal_authorization_expires_at, agent_tokens(label)",
+        "id, vendor_name, merchant_handle, amount_cents, currency, description, source_context, status, block_reason, authorization_error, created_at, approved_at, decided_at, paypal_order_id, paypal_approve_url, paypal_authorization_id, paypal_authorization_status, paypal_authorization_expires_at, delivery_requirements, paypal_capture_id, paypal_capture_status, captured_at, captured_by, voided_at, settlement_error, agent_tokens(label), deliverables(id, filename, storage_path, mime_type, size_bytes, ai_verdict, ai_notes, ai_confidence, uploaded_at, reviewed_at), delivery_links(id, expires_at, used_at, revoked, created_at)",
       )
       .order("created_at", { ascending: false })
       .limit(100);
     if (error) throw error;
     return data;
   },
-  // While a request waits on PayPal (often finished in another tab), poll for the result.
-  refetchInterval: (q) => (q.state.data?.some((r) => r.status === "authorizing") ? 4000 : false),
+  // While something finishes elsewhere (PayPal tab, merchant upload, a capture), poll for the result.
+  refetchInterval: (q) =>
+    q.state.data?.some((r) => IN_FLIGHT.has(r.status) || r.deliverables.some((d) => d.ai_verdict === "pending")) ||
+    q.state.data?.some((r) => r.status === "authorized")
+      ? 5000
+      : false,
 });

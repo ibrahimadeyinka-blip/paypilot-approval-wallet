@@ -21,10 +21,14 @@ export type Database = {
           authorization_attempt: number
           authorization_error: string | null
           block_reason: string | null
+          capture_attempt: number
+          captured_at: string | null
+          captured_by: string | null
           created_at: string
           currency: string
           decided_at: string | null
           decided_by: string | null
+          delivery_requirements: string | null
           description: string
           id: string
           idempotency_key: string | null
@@ -34,13 +38,18 @@ export type Database = {
           paypal_authorization_expires_at: string | null
           paypal_authorization_id: string | null
           paypal_authorization_status: string | null
+          paypal_capture_id: string | null
+          paypal_capture_status: string | null
           paypal_order_id: string | null
+          settlement_error: string | null
           source_context: string
           status: string
           token_id: string
           transaction_id: string | null
           updated_at: string
           vendor_name: string
+          void_attempt: number
+          voided_at: string | null
         }
         Insert: {
           amount_cents: number
@@ -48,10 +57,14 @@ export type Database = {
           authorization_attempt?: number
           authorization_error?: string | null
           block_reason?: string | null
+          capture_attempt?: number
+          captured_at?: string | null
+          captured_by?: string | null
           created_at?: string
           currency?: string
           decided_at?: string | null
           decided_by?: string | null
+          delivery_requirements?: string | null
           description?: string
           id?: string
           idempotency_key?: string | null
@@ -61,13 +74,18 @@ export type Database = {
           paypal_authorization_expires_at?: string | null
           paypal_authorization_id?: string | null
           paypal_authorization_status?: string | null
+          paypal_capture_id?: string | null
+          paypal_capture_status?: string | null
           paypal_order_id?: string | null
+          settlement_error?: string | null
           source_context?: string
           status: string
           token_id: string
           transaction_id?: string | null
           updated_at?: string
           vendor_name?: string
+          void_attempt?: number
+          voided_at?: string | null
         }
         Update: {
           amount_cents?: number
@@ -75,10 +93,14 @@ export type Database = {
           authorization_attempt?: number
           authorization_error?: string | null
           block_reason?: string | null
+          capture_attempt?: number
+          captured_at?: string | null
+          captured_by?: string | null
           created_at?: string
           currency?: string
           decided_at?: string | null
           decided_by?: string | null
+          delivery_requirements?: string | null
           description?: string
           id?: string
           idempotency_key?: string | null
@@ -88,13 +110,18 @@ export type Database = {
           paypal_authorization_expires_at?: string | null
           paypal_authorization_id?: string | null
           paypal_authorization_status?: string | null
+          paypal_capture_id?: string | null
+          paypal_capture_status?: string | null
           paypal_order_id?: string | null
+          settlement_error?: string | null
           source_context?: string
           status?: string
           token_id?: string
           transaction_id?: string | null
           updated_at?: string
           vendor_name?: string
+          void_attempt?: number
+          voided_at?: string | null
         }
         Relationships: [
           {
@@ -269,44 +296,124 @@ export type Database = {
       }
       deliverables: {
         Row: {
+          ai_confidence: number | null
+          ai_model: string | null
           ai_notes: string | null
           ai_verdict: string
           filename: string
           id: string
+          link_id: string | null
           mime_type: string | null
+          request_id: string | null
+          reviewed_at: string | null
           size_bytes: number | null
           storage_path: string
           transaction_id: string
           uploaded_at: string
+          uploaded_by: string
         }
         Insert: {
+          ai_confidence?: number | null
+          ai_model?: string | null
           ai_notes?: string | null
           ai_verdict?: string
           filename?: string
           id?: string
+          link_id?: string | null
           mime_type?: string | null
+          request_id?: string | null
+          reviewed_at?: string | null
           size_bytes?: number | null
           storage_path?: string
           transaction_id: string
           uploaded_at?: string
+          uploaded_by?: string
         }
         Update: {
+          ai_confidence?: number | null
+          ai_model?: string | null
           ai_notes?: string | null
           ai_verdict?: string
           filename?: string
           id?: string
+          link_id?: string | null
           mime_type?: string | null
+          request_id?: string | null
+          reviewed_at?: string | null
           size_bytes?: number | null
           storage_path?: string
           transaction_id?: string
           uploaded_at?: string
+          uploaded_by?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "deliverables_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliverables_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "agent_payment_requests"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "deliverables_transaction_id_fkey"
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_links: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          owner_id: string
+          request_id: string
+          revoked: boolean
+          token_hash: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          owner_id: string
+          request_id: string
+          revoked?: boolean
+          token_hash: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          owner_id?: string
+          request_id?: string
+          revoked?: boolean
+          token_hash?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_links_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_links_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "agent_payment_requests"
             referencedColumns: ["id"]
           },
         ]
@@ -560,8 +667,26 @@ export type Database = {
         Args: { p_owner_id: string; p_request_id: string }
         Returns: Json
       }
+      begin_agent_capture: {
+        Args: { p_actor: string; p_owner_id: string; p_request_id: string }
+        Returns: Json
+      }
+      begin_agent_void: {
+        Args: { p_owner_id: string; p_request_id: string }
+        Returns: Json
+      }
       check_agent_authorization: {
         Args: { p_order_id: string; p_owner_id: string; p_request_id: string }
+        Returns: Json
+      }
+      claim_delivery_link: { Args: { p_token_hash: string }; Returns: Json }
+      create_delivery_link: {
+        Args: {
+          p_days: number
+          p_request_id: string
+          p_requirements: string
+          p_token_hash: string
+        }
         Returns: Json
       }
       decide_agent_payment: {
@@ -573,6 +698,20 @@ export type Database = {
         Args: { p_attempt: number; p_error: string; p_request_id: string }
         Returns: boolean
       }
+      fail_agent_capture: {
+        Args: {
+          p_attempt: number
+          p_error: string
+          p_request_id: string
+          p_terminal: boolean
+        }
+        Returns: boolean
+      }
+      fail_agent_void: {
+        Args: { p_attempt: number; p_error: string; p_request_id: string }
+        Returns: boolean
+      }
+      get_delivery_link_info: { Args: { p_token_hash: string }; Returns: Json }
       record_agent_authorization: {
         Args: {
           p_attempt: number
@@ -584,6 +723,42 @@ export type Database = {
         }
         Returns: Json
       }
+      record_agent_capture: {
+        Args: {
+          p_attempt: number
+          p_capture_id: string
+          p_capture_status: string
+          p_request_id: string
+        }
+        Returns: Json
+      }
+      record_agent_void: {
+        Args: { p_attempt: number; p_note: string; p_request_id: string }
+        Returns: Json
+      }
+      record_deliverable: {
+        Args: {
+          p_deliverable_id: string
+          p_filename: string
+          p_link_id: string
+          p_mime: string
+          p_request_id: string
+          p_size: number
+          p_storage_path: string
+        }
+        Returns: string
+      }
+      record_deliverable_review: {
+        Args: {
+          p_confidence: number
+          p_deliverable_id: string
+          p_model: string
+          p_summary: string
+          p_verdict: string
+        }
+        Returns: undefined
+      }
+      release_delivery_link: { Args: { p_link_id: string }; Returns: undefined }
       respond_to_order: {
         Args: { p_accept: boolean; p_message_id: string }
         Returns: string
