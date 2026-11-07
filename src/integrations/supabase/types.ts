@@ -14,13 +14,506 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agent_payment_requests: {
+        Row: {
+          amount_cents: number
+          block_reason: string | null
+          created_at: string
+          currency: string
+          decided_at: string | null
+          description: string
+          id: string
+          merchant_handle: string
+          owner_id: string
+          source_context: string
+          status: string
+          token_id: string
+          transaction_id: string | null
+          vendor_name: string
+        }
+        Insert: {
+          amount_cents: number
+          block_reason?: string | null
+          created_at?: string
+          currency?: string
+          decided_at?: string | null
+          description?: string
+          id?: string
+          merchant_handle?: string
+          owner_id: string
+          source_context?: string
+          status: string
+          token_id: string
+          transaction_id?: string | null
+          vendor_name?: string
+        }
+        Update: {
+          amount_cents?: number
+          block_reason?: string | null
+          created_at?: string
+          currency?: string
+          decided_at?: string | null
+          description?: string
+          id?: string
+          merchant_handle?: string
+          owner_id?: string
+          source_context?: string
+          status?: string
+          token_id?: string
+          transaction_id?: string | null
+          vendor_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_payment_requests_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_payment_requests_token_id_fkey"
+            columns: ["token_id"]
+            isOneToOne: false
+            referencedRelation: "agent_tokens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_payment_requests_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          label: string
+          merchant_whitelist: string[]
+          owner_id: string
+          revoked: boolean
+          token_hash: string
+          token_prefix: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          label: string
+          merchant_whitelist?: string[]
+          owner_id?: string
+          revoked?: boolean
+          token_hash: string
+          token_prefix: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          label?: string
+          merchant_whitelist?: string[]
+          owner_id?: string
+          revoked?: boolean
+          token_hash?: string
+          token_prefix?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_tokens_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_timeline: {
+        Row: {
+          actor: string
+          created_at: string
+          detail: string | null
+          id: string
+          metadata: Json
+          step: string
+          title: string
+          transaction_id: string
+        }
+        Insert: {
+          actor?: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          metadata?: Json
+          step: string
+          title?: string
+          transaction_id: string
+        }
+        Update: {
+          actor?: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          metadata?: Json
+          step?: string
+          title?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_timeline_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          id: string
+          product_id: string
+          seller_id: string
+          status: string
+          transaction_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          product_id: string
+          seller_id: string
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          seller_id?: string
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deliverables: {
+        Row: {
+          ai_notes: string | null
+          ai_verdict: string
+          filename: string
+          id: string
+          mime_type: string | null
+          size_bytes: number | null
+          storage_path: string
+          transaction_id: string
+          uploaded_at: string
+        }
+        Insert: {
+          ai_notes?: string | null
+          ai_verdict?: string
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path?: string
+          transaction_id: string
+          uploaded_at?: string
+        }
+        Update: {
+          ai_notes?: string | null
+          ai_verdict?: string
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path?: string
+          transaction_id?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliverables_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      escrow_events: {
+        Row: {
+          amount_cents: number | null
+          created_at: string
+          detail: string | null
+          event_type: string
+          id: string
+          transaction_id: string
+        }
+        Insert: {
+          amount_cents?: number | null
+          created_at?: string
+          detail?: string | null
+          event_type: string
+          id?: string
+          transaction_id: string
+        }
+        Update: {
+          amount_cents?: number | null
+          created_at?: string
+          detail?: string | null
+          event_type?: string
+          id?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escrow_events_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          draft_transaction: Json | null
+          id: string
+          role: string
+          sender_id: string
+        }
+        Insert: {
+          content?: string
+          conversation_id: string
+          created_at?: string
+          draft_transaction?: Json | null
+          id?: string
+          role?: string
+          sender_id?: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          draft_transaction?: Json | null
+          id?: string
+          role?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          category: string | null
+          created_at: string
+          currency: string
+          description: string
+          id: string
+          image_url: string | null
+          price_cents: number
+          seller_id: string
+          status: string
+          stock: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          currency?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          price_cents?: number
+          seller_id?: string
+          status?: string
+          stock?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          currency?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          price_cents?: number
+          seller_id?: string
+          status?: string
+          stock?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          paypal_connected: boolean
+          paypal_handle: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string
+          id: string
+          paypal_connected?: boolean
+          paypal_handle?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          paypal_connected?: boolean
+          paypal_handle?: string | null
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          ai_reasoning: string | null
+          ai_request: string
+          amount_cents: number
+          created_at: string
+          currency: string
+          description: string
+          id: string
+          proof_verified: boolean
+          source_filename: string | null
+          source_text: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          vendor_handle: string | null
+          vendor_name: string
+        }
+        Insert: {
+          ai_reasoning?: string | null
+          ai_request?: string
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          description?: string
+          id?: string
+          proof_verified?: boolean
+          source_filename?: string | null
+          source_text?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          vendor_handle?: string | null
+          vendor_name?: string
+        }
+        Update: {
+          ai_reasoning?: string | null
+          ai_request?: string
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          description?: string
+          id?: string
+          proof_verified?: boolean
+          source_filename?: string | null
+          source_text?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          vendor_handle?: string | null
+          vendor_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      advance_transaction: {
+        Args: { p_action: string; p_transaction_id: string }
+        Returns: undefined
+      }
+      decide_agent_payment: {
+        Args: { p_approve: boolean; p_request_id: string }
+        Returns: string
+      }
+      respond_to_order: {
+        Args: { p_accept: boolean; p_message_id: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
