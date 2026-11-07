@@ -7,7 +7,7 @@ type AuthorizationDetails = { client?: { name?: string }; redirect_uri?: string;
 export const Route = createFileRoute("/.lovable/oauth/consent")({
   ssr: false,
   head: () => ({ meta: [{ title: "Connect your account — Payrail" }, { name: "description", content: "Review and approve an external assistant's access to your Payrail account." }, { property: "og:title", content: "Connect your account — Payrail" }, { property: "og:description", content: "Secure account connection consent." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
-  validateSearch: (s: Record<string, unknown>) => ({ authorization_id: typeof s.authorization_id === "string" ? s.authorization_id : "" }),
+  validateSearch: (s: Record<string, unknown>) => ({ authorization_id: typeof s["authorization_id"] === "string" ? s["authorization_id"] : "" }),
   beforeLoad: async ({ search, location }) => {
     if (!search.authorization_id) throw new Error("This connection link is missing its authorization request.");
     const { data, error } = await supabase.auth.getUser();
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
     if (!details?.client) throw new Error("The connection request could not be loaded.");
     return details;
   },
-  errorComponent: ({ error }) => <main className="mx-auto max-w-lg px-6 py-16"><h1 className="text-xl font-semibold">Connection unavailable</h1><p role="alert" className="mt-3 text-muted-foreground">{error.message}</p></main>,
+  errorComponent: ({ error }) => <main className="mx-auto max-w-lg px-6 py-16"><h1 className="text-xl font-semibold">Connection unavailable</h1><p role="alert" className="mt-3 text-muted-foreground">{error instanceof Error ? error.message : "Start the connection again."}</p></main>,
   component: Consent,
 });
 function Consent() {

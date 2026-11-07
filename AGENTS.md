@@ -30,6 +30,9 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Project rules
+- History changes are recorded atomically by the request trigger in `agent_history`; audit tables are client-read-only. Why: declined and blocked requests need a trail even before a transaction exists, and users must not forge audit events.
+- MCP exposes read-only payments and history using verified OAuth caller tokens and RLS, never an admin client; browser tools read only the rendered ledger collection. Why: integrations must preserve ownership and cannot move funds or share credentials.
+- Ledger totals distinguish authorization holds, confirmed captures, unconfirmed captures, and released holds; exports neutralize spreadsheet formulas. Why: reserved money is not payment and merchant text is untrusted.
 - Agent payment guardrails (single cap, rolling 24h budget, merchant allowlist, token expiry/revocation, idempotency) are enforced only inside the `submit_agent_payment` database function, called by `/api/public/agent-gateway`; the function locks the token row so concurrent requests serialize. Why: one atomic, server-side source of truth that cannot be bypassed or raced.
 - Requests that are pending, waiting on PayPal, or holding funds all count toward the 24h budget (`agent_budget_statuses()`); failed, declined and blocked ones don't. Why: open requests reserve budget so approval can't exceed the limit.
 - Agent tokens are stored only as SHA-256 hashes; the plaintext is shown once at issue time. Why: a database leak must not leak usable tokens.
