@@ -100,7 +100,10 @@ export function DeliveryPanel({ r }: { r: DeliveryRequest }) {
 
   async function viewFile(d: Deliverable) {
     const { data, error } = await supabase.storage.from("deliverables").createSignedUrl(d.storage_path, 300);
-    if (error || !data) return toast.error("Could not open the file.");
+    if (error || !data) {
+      toast.error("Could not open the file.");
+      return;
+    }
     window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   }
 
