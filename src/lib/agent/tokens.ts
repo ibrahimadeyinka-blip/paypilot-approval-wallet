@@ -20,7 +20,32 @@ export function parseMerchantList(input: string): string[] {
 }
 
 /** The plaintext secret is returned once and never stored; only its SHA-256 hash is saved. */
-export async function issueAgentToken(label: string, lifetimeDays: number, merchants: string[]) {
+/** Owner-chosen limits, in whole cents. Mirrors the database check constraint. */
+export const CAP_BOUNDS = { minSingle: 100, maxSingle: 1_000_000, maxDaily: 5_000_000 } as const;
+
+/** Parses a dollar amount like "150" or "150.50" into cents; null when invalid. */
+export function dollarsToCents(input: string): number | null {
+  const t = input.trim();
+  if (!/^\d+(\.\d{1,2})?$/.test(t)) return null;
+  return Math.round(Number(t) * 100);
+}
+
+export function validateCaps(single: number | null, daily: number | null): string | null {
+  if (single === null || daily === null) return "Enter limits as dollar amounts, e.g. 150 or 150.50.";
+  if (single < CAP_BOUNDS.minSingle) return "The single payment cap must be at least $1.";
+  if (single > CAP_BOUNDS.maxSingle) return "The single payment cap can be at most $10,000.";
+  if (daily < single) return "The 24h budget can't be smaller than the single payment cap.";
+  if (daily > CAP_BOUNDS.maxDaily) return "The 24h budget can be at most $50,000.";
+  return null;
+}
+
+export async function issueAgentToken(
+  label: string,
+  lifetimeDays: number,
+  merchants: string[],
+  singleCapCents: number,
+  dailyCapCents: number,
+) {
   const secret = generateSecret();
   const { data, error } = await supabase
     .from("agent_tokens")
@@ -30,6 +55,8 @@ export async function issueAgentToken(label: string, lifetimeDays: number, merch
       token_prefix: secret.slice(0, 12),
       expires_at: new Date(Date.now() + lifetimeDays * 86_400_000).toISOString(),
       merchant_whitelist: merchants,
+      single_cap_cents: singleCapCents,
+      daily_cap_cents: dailyCapCents,
     })
     .select("*")
     .single();
@@ -47,7 +74,7 @@ export const agentTokensQuery = queryOptions({
   queryFn: async () => {
     const { data, error } = await supabase
       .from("agent_tokens")
-      .select("id, label, token_prefix, expires_at, merchant_whitelist, revoked, created_at")
+      .select("id, label, token_prefix, expires_at, merchant_whitelist, single_cap_cents, daily_cap_cents, revoked, created_at")
       .order("created_at", { ascending: false });
     if (error) throw error;
     return data;
