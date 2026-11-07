@@ -17,6 +17,7 @@ import { Route as AuthenticatedApprovalsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 import { Route as PaypalReturnRouteImport } from './routes/paypal.return'
 import { Route as ApiPublicAgentGatewayRouteImport } from './routes/api/public/agent-gateway'
+import { Route as ApiPublicDeliverRouteImport } from './routes/api/public/deliver'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -57,6 +58,11 @@ const ApiPublicAgentGatewayRoute = ApiPublicAgentGatewayRouteImport.update({
   path: '/api/public/agent-gateway',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDeliverRoute = ApiPublicDeliverRouteImport.update({
+  id: '/api/public/deliver',
+  path: '/api/public/deliver',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/wallet': typeof AuthenticatedWalletRoute
   '/paypal/return': typeof PaypalReturnRoute
   '/api/public/agent-gateway': typeof ApiPublicAgentGatewayRoute
+  '/api/public/deliver': typeof ApiPublicDeliverRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/wallet': typeof AuthenticatedWalletRoute
   '/paypal/return': typeof PaypalReturnRoute
   '/api/public/agent-gateway': typeof ApiPublicAgentGatewayRoute
+  '/api/public/deliver': typeof ApiPublicDeliverRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/paypal/return': typeof PaypalReturnRoute
   '/api/public/agent-gateway': typeof ApiPublicAgentGatewayRoute
+  '/api/public/deliver': typeof ApiPublicDeliverRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/paypal/return'
     | '/api/public/agent-gateway'
+    | '/api/public/deliver'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/paypal/return'
     | '/api/public/agent-gateway'
+    | '/api/public/deliver'
   id:
     | '__root__'
     | '/'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/_authenticated/wallet'
     | '/paypal/return'
     | '/api/public/agent-gateway'
+    | '/api/public/deliver'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -125,6 +137,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   PaypalReturnRoute: typeof PaypalReturnRoute
   ApiPublicAgentGatewayRoute: typeof ApiPublicAgentGatewayRoute
+  ApiPublicDeliverRoute: typeof ApiPublicDeliverRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAgentGatewayRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/deliver': {
+      id: '/api/public/deliver'
+      path: '/api/public/deliver'
+      fullPath: '/api/public/deliver'
+      preLoaderRoute: typeof ApiPublicDeliverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -208,6 +228,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   PaypalReturnRoute: PaypalReturnRoute,
   ApiPublicAgentGatewayRoute: ApiPublicAgentGatewayRoute,
+  ApiPublicDeliverRoute: ApiPublicDeliverRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
