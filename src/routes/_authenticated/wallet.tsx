@@ -15,6 +15,7 @@ import {
   revokeAgentToken,
   TOKEN_LIFETIMES,
 } from "@/lib/agent/tokens";
+import { statusMeta } from "@/lib/agent/status";
 
 export const Route = createFileRoute("/_authenticated/wallet")({
   head: () => ({
@@ -177,7 +178,7 @@ function Wallet() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-mono">{usd(r.amount_cents)}</span>
-                <Badge variant={r.status === "blocked" ? "destructive" : "secondary"}>{r.status.replace("_", " ")}</Badge>
+                <Badge variant={statusMeta(r.status).tone}>{statusMeta(r.status).label}</Badge>
               </div>
             </li>
           ))}
