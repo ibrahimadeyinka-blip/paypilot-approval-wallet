@@ -204,34 +204,40 @@ export type Database = {
       agent_tokens: {
         Row: {
           created_at: string
+          daily_cap_cents: number
           expires_at: string
           id: string
           label: string
           merchant_whitelist: string[]
           owner_id: string
           revoked: boolean
+          single_cap_cents: number
           token_hash: string
           token_prefix: string
         }
         Insert: {
           created_at?: string
+          daily_cap_cents?: number
           expires_at: string
           id?: string
           label: string
           merchant_whitelist?: string[]
           owner_id?: string
           revoked?: boolean
+          single_cap_cents?: number
           token_hash: string
           token_prefix: string
         }
         Update: {
           created_at?: string
+          daily_cap_cents?: number
           expires_at?: string
           id?: string
           label?: string
           merchant_whitelist?: string[]
           owner_id?: string
           revoked?: boolean
+          single_cap_cents?: number
           token_hash?: string
           token_prefix?: string
         }
