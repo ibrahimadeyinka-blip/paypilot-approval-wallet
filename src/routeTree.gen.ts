@@ -14,6 +14,8 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedApprovalsRouteImport } from './routes/_authenticated/approvals'
+import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
+import { Route as AuthenticatedLedgerRouteImport } from './routes/_authenticated/ledger'
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 import { Route as DeliverTokenRouteImport } from './routes/deliver.$token'
 import { Route as PaypalReturnRouteImport } from './routes/paypal.return'
@@ -42,6 +44,16 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const AuthenticatedApprovalsRoute = AuthenticatedApprovalsRouteImport.update({
   id: '/approvals',
   path: '/approvals',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLedgerRoute = AuthenticatedLedgerRouteImport.update({
+  id: '/ledger',
+  path: '/ledger',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
@@ -75,6 +87,8 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
+  '/history': typeof AuthenticatedHistoryRoute
+  '/ledger': typeof AuthenticatedLedgerRoute
   '/wallet': typeof AuthenticatedWalletRoute
   '/deliver/$token': typeof DeliverTokenRoute
   '/paypal/return': typeof PaypalReturnRoute
@@ -86,6 +100,8 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
+  '/history': typeof AuthenticatedHistoryRoute
+  '/ledger': typeof AuthenticatedLedgerRoute
   '/wallet': typeof AuthenticatedWalletRoute
   '/deliver/$token': typeof DeliverTokenRoute
   '/paypal/return': typeof PaypalReturnRoute
@@ -99,6 +115,8 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/approvals': typeof AuthenticatedApprovalsRoute
+  '/_authenticated/history': typeof AuthenticatedHistoryRoute
+  '/_authenticated/ledger': typeof AuthenticatedLedgerRoute
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/deliver/$token': typeof DeliverTokenRoute
   '/paypal/return': typeof PaypalReturnRoute
@@ -112,6 +130,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/approvals'
+    | '/history'
+    | '/ledger'
     | '/wallet'
     | '/deliver/$token'
     | '/paypal/return'
@@ -123,6 +143,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/approvals'
+    | '/history'
+    | '/ledger'
     | '/wallet'
     | '/deliver/$token'
     | '/paypal/return'
@@ -135,6 +157,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/approvals'
+    | '/_authenticated/history'
+    | '/_authenticated/ledger'
     | '/_authenticated/wallet'
     | '/deliver/$token'
     | '/paypal/return'
@@ -190,6 +214,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedApprovalsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/history': {
+      id: '/_authenticated/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof AuthenticatedHistoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ledger': {
+      id: '/_authenticated/ledger'
+      path: '/ledger'
+      fullPath: '/ledger'
+      preLoaderRoute: typeof AuthenticatedLedgerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/wallet': {
       id: '/_authenticated/wallet'
       path: '/wallet'
@@ -230,11 +268,15 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedApprovalsRoute: typeof AuthenticatedApprovalsRoute
+  AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
+  AuthenticatedLedgerRoute: typeof AuthenticatedLedgerRoute
   AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedApprovalsRoute: AuthenticatedApprovalsRoute,
+  AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
+  AuthenticatedLedgerRoute: AuthenticatedLedgerRoute,
   AuthenticatedWalletRoute: AuthenticatedWalletRoute,
 }
 
