@@ -12,13 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedApprovalsRouteImport } from './routes/_authenticated/approvals'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedLedgerRouteImport } from './routes/_authenticated/ledger'
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 import { Route as DeliverTokenRouteImport } from './routes/deliver.$token'
 import { Route as PaypalReturnRouteImport } from './routes/paypal.return'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicAgentGatewayRouteImport } from './routes/api/public/agent-gateway'
 import { Route as ApiPublicDeliverRouteImport } from './routes/api/public/deliver'
 
@@ -36,11 +39,22 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedApprovalsRoute = AuthenticatedApprovalsRouteImport.update({
   id: '/approvals',
   path: '/approvals',
@@ -71,6 +85,11 @@ const PaypalReturnRoute = PaypalReturnRouteImport.update({
   path: '/paypal/return',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAgentGatewayRoute = ApiPublicAgentGatewayRouteImport.update({
   id: '/api/public/agent-gateway',
   path: '/api/public/agent-gateway',
@@ -85,26 +104,32 @@ const ApiPublicDeliverRoute = ApiPublicDeliverRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/ledger': typeof AuthenticatedLedgerRoute
   '/wallet': typeof AuthenticatedWalletRoute
   '/deliver/$token': typeof DeliverTokenRoute
   '/paypal/return': typeof PaypalReturnRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/agent-gateway': typeof ApiPublicAgentGatewayRoute
   '/api/public/deliver': typeof ApiPublicDeliverRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/ledger': typeof AuthenticatedLedgerRoute
   '/wallet': typeof AuthenticatedWalletRoute
   '/deliver/$token': typeof DeliverTokenRoute
   '/paypal/return': typeof PaypalReturnRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/agent-gateway': typeof ApiPublicAgentGatewayRoute
   '/api/public/deliver': typeof ApiPublicDeliverRoute
 }
@@ -113,13 +138,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/approvals': typeof AuthenticatedApprovalsRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/ledger': typeof AuthenticatedLedgerRoute
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/deliver/$token': typeof DeliverTokenRoute
   '/paypal/return': typeof PaypalReturnRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/agent-gateway': typeof ApiPublicAgentGatewayRoute
   '/api/public/deliver': typeof ApiPublicDeliverRoute
 }
@@ -128,26 +156,32 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/mcp'
     | '/reset-password'
+    | '/.well-known/oauth-protected-resource'
     | '/approvals'
     | '/history'
     | '/ledger'
     | '/wallet'
     | '/deliver/$token'
     | '/paypal/return'
+    | '/.lovable/oauth/consent'
     | '/api/public/agent-gateway'
     | '/api/public/deliver'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/mcp'
     | '/reset-password'
+    | '/.well-known/oauth-protected-resource'
     | '/approvals'
     | '/history'
     | '/ledger'
     | '/wallet'
     | '/deliver/$token'
     | '/paypal/return'
+    | '/.lovable/oauth/consent'
     | '/api/public/agent-gateway'
     | '/api/public/deliver'
   id:
@@ -155,13 +189,16 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/mcp'
     | '/reset-password'
+    | '/.well-known/oauth-protected-resource'
     | '/_authenticated/approvals'
     | '/_authenticated/history'
     | '/_authenticated/ledger'
     | '/_authenticated/wallet'
     | '/deliver/$token'
     | '/paypal/return'
+    | '/.lovable/oauth/consent'
     | '/api/public/agent-gateway'
     | '/api/public/deliver'
   fileRoutesById: FileRoutesById
@@ -170,9 +207,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  McpRoute: typeof McpRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DeliverTokenRoute: typeof DeliverTokenRoute
   PaypalReturnRoute: typeof PaypalReturnRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicAgentGatewayRoute: typeof ApiPublicAgentGatewayRoute
   ApiPublicDeliverRoute: typeof ApiPublicDeliverRoute
 }
@@ -200,11 +240,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/approvals': {
@@ -249,6 +303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PaypalReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/agent-gateway': {
       id: '/api/public/agent-gateway'
       path: '/api/public/agent-gateway'
@@ -287,9 +348,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  McpRoute: McpRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DeliverTokenRoute: DeliverTokenRoute,
   PaypalReturnRoute: PaypalReturnRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicAgentGatewayRoute: ApiPublicAgentGatewayRoute,
   ApiPublicDeliverRoute: ApiPublicDeliverRoute,
 }
