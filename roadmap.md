@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] Activate AG Grid Community in History and Ledger, preserving audit details and safe CSV exports
+- [ ] Configure existing PayPal Sandbox credentials securely (rotate secret exposed in chat)
 - [x] Revamp all Payrail screens with reference-inspired design, typography, motion, and a custom favicon; preserve payment logic (public desktop/mobile checks passed)
 - [ ] Verify redesigned signed-in wallet, approvals, history, ledger and consent screens (needs a confirmed account; remix has no auth users)
 - [x] Verify the remix has a clean, empty migration baseline and the correct database connection
