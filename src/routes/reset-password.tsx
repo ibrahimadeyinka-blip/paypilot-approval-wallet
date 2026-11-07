@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Choose a new password — Payrail" },
       { name: "description", content: "Set a new password for your Payrail account." },
       { property: "og:title", content: "Choose a new password — Payrail" },

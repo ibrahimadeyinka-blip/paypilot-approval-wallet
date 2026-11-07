@@ -14,6 +14,8 @@ import { approveAgentRequest, confirmAgentAuthorization, declineAgentRequest } f
 export const Route = createFileRoute("/_authenticated/approvals")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Approvals — Payrail" },
       { name: "description", content: "Review what your agents want to pay for, with their quoted evidence, before any funds are held." },
       { property: "og:title", content: "Approvals — Payrail" },

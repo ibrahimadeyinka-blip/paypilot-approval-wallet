@@ -7,11 +7,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { oauthReturnPath } from "@/lib/oauth-return-path";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ redirect: z.string().optional() }),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Sign in — Payrail" },
       { name: "description", content: "Sign in to manage your agent tokens and payment approvals." },
       { property: "og:title", content: "Sign in — Payrail" },
@@ -32,7 +35,7 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const safeTo = to && to.startsWith("/") && !to.startsWith("//") ? to : "/wallet";
+  const safeTo = oauthReturnPath(to);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -46,7 +49,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/wallet`, data: { display_name: name } },
+          options: { emailRedirectTo: new URL(safeTo, window.location.origin).href, data: { display_name: name } },
         });
         if (error) throw error;
         toast.success("Check your email to confirm your account.");

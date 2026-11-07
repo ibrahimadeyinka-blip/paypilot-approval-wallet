@@ -20,6 +20,8 @@ import { statusMeta } from "@/lib/agent/status";
 export const Route = createFileRoute("/_authenticated/wallet")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Agent Wallet — Payrail" },
       { name: "description", content: "Issue and revoke limited payment tokens for your AI agents." },
       { property: "og:title", content: "Agent Wallet — Payrail" },
