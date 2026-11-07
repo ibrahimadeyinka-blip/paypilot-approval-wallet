@@ -31,7 +31,7 @@ use the editor.
 
 ## Project rules
 - Agent payment guardrails (single cap, rolling 24h budget, merchant allowlist, token expiry/revocation, idempotency) are enforced only inside the `submit_agent_payment` database function, called by `/api/public/agent-gateway`; the function locks the token row so concurrent requests serialize. Why: one atomic, server-side source of truth that cannot be bypassed or raced.
-- Pending and approved agent requests both count toward the 24h budget. Why: pending requests reserve budget so approval can't exceed the limit.
+- Requests that are pending, waiting on PayPal, or holding funds all count toward the 24h budget (`agent_budget_statuses()`); failed, declined and blocked ones don't. Why: open requests reserve budget so approval can't exceed the limit.
 - Agent tokens are stored only as SHA-256 hashes; the plaintext is shown once at issue time. Why: a database leak must not leak usable tokens.
 - Owner approval and PayPal holds run through `begin_/check_/attach_/fail_/record_agent_authorization` database functions (service_role only) orchestrated by `src/lib/agent/approval-flow.server.ts`; each re-checks token, expiry, merchant, amount, budget and status under row locks. Why: the hold can't be placed after a token is revoked or a request is declined.
 - Every PayPal call sends a PayPal-Request-Id derived from `request id + attempt + step`, and the PayPal client is hard-wired to the Sandbox API. Why: retries and double clicks can't create duplicate orders or holds, and live money can't be touched.
