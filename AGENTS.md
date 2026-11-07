@@ -45,3 +45,4 @@ use the editor.
 - Capture and void go through `begin_/record_/fail_agent_capture` and `begin_/record_/fail_agent_void` (service_role only), orchestrated by `src/lib/delivery/settlement-flow.server.ts`; `capturing`/`voiding` are lock states so capture and void can't race, and retries reuse the same PayPal-Request-Id per attempt. Why: no double capture, no capture after release.
 
 - Share Payrail branding and public account framing through the brand and public-frame components; theme all screens through global semantic tokens. Why: keeps public and authenticated experiences consistent without changing payment logic.
+- Agent analytics read drafts from `agent_drafts` (written by `draftDirective`, best-effort) and sent/blocked/approved from `agent_history`; funnel math lives in `src/lib/analytics.ts`, and visitor events use `project.agent_request_*` via `track()`. Why: one tested source for the funnel, and analytics failures never block a draft.
