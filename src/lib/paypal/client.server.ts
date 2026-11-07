@@ -128,6 +128,17 @@ export const sandboxPaypal = {
   async voidAuthorization(authorizationId: string, requestKey: string): Promise<void> {
     await authed(`/v2/payments/authorizations/${encodeURIComponent(authorizationId)}/void`, "POST", requestKey);
   },
+
+  /** Captures the full authorized amount. The PayPal-Request-Id makes retries return the same capture. */
+  async captureAuthorization(authorizationId: string, requestKey: string): Promise<{ captureId: string | null; status: string }> {
+    const body = (await authed(
+      `/v2/payments/authorizations/${encodeURIComponent(authorizationId)}/capture`,
+      "POST",
+      requestKey,
+      { final_capture: true },
+    )) as { id?: string; status?: string } | null;
+    return { captureId: body?.id ?? null, status: body?.status ?? "UNKNOWN" };
+  },
 };
 
 export type SandboxPaypal = typeof sandboxPaypal;
