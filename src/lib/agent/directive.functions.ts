@@ -77,7 +77,9 @@ export const submitDirective = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     // Ownership is checked through RLS; the database function re-checks every guardrail.
     const token = await loadToken(context, data.tokenId);
-    const b = paymentRequestSchema.parse({ ...data, currency: "USD", source_context: `Owner directive: ${data.directive}` });
+    const req = data.delivery_requirements.trim();
+    const description = req ? `${data.description.trim()} — Must deliver: ${req}`.slice(0, 2000) : data.description;
+    const b = paymentRequestSchema.parse({ ...data, description, currency: "USD", source_context: `Owner directive: ${data.directive}` });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: res, error } = await supabaseAdmin.rpc("submit_agent_payment", {
       p_token_hash: token.token_hash,
@@ -91,8 +93,5 @@ export const submitDirective = createServerFn({ method: "POST" })
     });
     if (error) throw new Error("Couldn't submit the request.");
     const r = res as { outcome: string; request_id?: string; status?: string; reason?: string | null };
-    if (r.request_id && data.delivery_requirements.trim()) {
-      await context.supabase.from("agent_payment_requests").update({ delivery_requirements: data.delivery_requirements.trim() }).eq("id", r.request_id);
-    }
     return { outcome: r.outcome, status: r.status ?? r.outcome, reason: r.reason ?? null, requestId: r.request_id ?? null };
   });
