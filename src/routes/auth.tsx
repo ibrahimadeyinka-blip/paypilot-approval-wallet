@@ -13,6 +13,8 @@ export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ redirect: z.string().optional() }),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Sign in — Payrail" },
       { name: "description", content: "Sign in to manage your agent tokens and payment approvals." },
       { property: "og:title", content: "Sign in — Payrail" },

@@ -15,6 +15,8 @@ export const Route = createFileRoute("/paypal/return")({
   validateSearch: (s) => searchSchema.parse(s),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Confirming your PayPal hold — Payrail" },
       { name: "description", content: "Payrail is confirming the PayPal Sandbox authorization hold you approved." },
       { property: "og:title", content: "Confirming your PayPal hold — Payrail" },

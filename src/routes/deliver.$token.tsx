@@ -12,6 +12,8 @@ const linkQuery = (token: string) =>
 export const Route = createFileRoute("/deliver/$token")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Deliver your work — Payrail" },
       { name: "description", content: "Upload the finished work for a payment that is on hold." },
       { property: "og:title", content: "Deliver your work — Payrail" },

@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Payrail — guarded payments for AI agents" },
       { name: "description", content: "Issue revocable agent tokens with server-enforced caps, daily budgets, and merchant allowlists." },
       { property: "og:title", content: "Payrail — guarded payments for AI agents" },
