@@ -49,7 +49,10 @@ function Wallet() {
   async function issue(e: FormEvent) {
     e.preventDefault();
     const list = parseMerchantList(merchants);
-    if (list.length === 0) return toast.error("Add at least one approved merchant.");
+    if (list.length === 0) {
+      toast.error("Add at least one approved merchant.");
+      return;
+    }
     setBusy(true);
     try {
       const { secret } = await issueAgentToken(label.trim(), lifetime, list);

@@ -25,8 +25,8 @@ export type PaymentRequestInput = z.infer<typeof paymentRequestSchema>;
 export function extractToken(authHeader: string | null, body: unknown): string | null {
   const fromHeader = authHeader?.match(/^Bearer\s+(\S+)$/i)?.[1];
   const fromBody =
-    body && typeof body === "object" && typeof (body as Record<string, unknown>).token === "string"
-      ? ((body as Record<string, unknown>).token as string).trim()
+    body && typeof body === "object" && typeof (body as Record<string, unknown>)["token"] === "string"
+      ? ((body as Record<string, unknown>)["token"] as string).trim()
       : undefined;
   const token = fromHeader ?? fromBody;
   if (!token || !token.startsWith(TOKEN_PREFIX) || token.length > 200) return null;
