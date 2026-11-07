@@ -65,3 +65,20 @@ export const agentRequestsQuery = queryOptions({
     return data;
   },
 });
+
+export const approvalsQuery = queryOptions({
+  queryKey: ["agent_payment_requests", "approvals"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("agent_payment_requests")
+      .select(
+        "id, vendor_name, merchant_handle, amount_cents, currency, description, source_context, status, block_reason, authorization_error, created_at, approved_at, decided_at, paypal_order_id, paypal_approve_url, paypal_authorization_id, paypal_authorization_status, paypal_authorization_expires_at, agent_tokens(label)",
+      )
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw error;
+    return data;
+  },
+  // While a request waits on PayPal (often finished in another tab), poll for the result.
+  refetchInterval: (q) => (q.state.data?.some((r) => r.status === "authorizing") ? 4000 : false),
+});

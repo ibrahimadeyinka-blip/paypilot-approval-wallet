@@ -13,18 +13,31 @@ export const Route = createFileRoute("/_authenticated")({
   component: AuthedLayout,
 });
 
+const navLink =
+  "rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground";
+
 function AuthedLayout() {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-          <Link to="/wallet" className="flex items-center gap-2 font-semibold">
-            <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <KeyRound className="size-4" />
-            </span>
-            Payrail
-          </Link>
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-3">
+          <div className="flex items-center gap-6">
+            <Link to="/wallet" className="flex items-center gap-2 font-semibold">
+              <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <KeyRound className="size-4" />
+              </span>
+              Payrail
+            </Link>
+            <nav className="flex items-center gap-1">
+              <Link to="/wallet" className={navLink} activeProps={{ className: "bg-muted text-foreground" }}>
+                Agent Wallet
+              </Link>
+              <Link to="/approvals" className={navLink} activeProps={{ className: "bg-muted text-foreground" }}>
+                Approvals
+              </Link>
+            </nav>
+          </div>
           <Button
             variant="ghost"
             size="sm"
