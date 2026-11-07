@@ -1,6 +1,36 @@
 {
   "schema_version": 1,
   "events": {
+    "project.agent_request_approved": {
+      "event_schema_version": 1,
+      "description": "The owner approved an agent request and PayPal confirmed the hold.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      }
+    },
+    "project.agent_request_blocked": {
+      "event_schema_version": 1,
+      "description": "An agent request was blocked by its token's limits before any hold.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "properties": {
+          "amount_cents": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
     "project.agent_request_drafted": {
       "event_schema_version": 1,
       "description": "The agent drafted a payment request from an owner's chat directive.",
@@ -14,6 +44,23 @@
           "ready": {
             "type": "boolean"
           },
+          "amount_cents": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "project.agent_request_sent": {
+      "event_schema_version": 1,
+      "description": "An agent request passed all token limits and was sent for owner approval.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "properties": {
           "amount_cents": {
             "type": "integer"
           }
