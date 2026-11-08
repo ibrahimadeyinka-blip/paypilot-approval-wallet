@@ -1,27 +1,5 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1794040005436,
-      "tag": "0000_restore_signup_profile_trigger",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1794043091561,
-      "tag": "0001_agent_drafts",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1794121894837,
-      "tag": "0002_optional_payee_allowlists",
-      "breakpoints": true
-    }
-  ]
+  "entries": []
 }
