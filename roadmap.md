@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Add owner-started AI tool runs and opt-in automatic guarded submission (live policy/proposal tool calls passed)
+- [x] Verify blank-payee approval guardrails and submission definition against the remixed database ($10 allowed, $10.01 blocked, unlisted restricted payee blocked)
+- [x] Add signed-in setup checklist with PayPal, applied schema and AI-assisted configuration checks (live AI explanation passed)
+- [ ] Verify signed-in automatic submission and setup checklist end to end (remix has no auth users; owner must sign up)
 - [ ] Update remixed PayPal Client ID and Client Secret (secure form was cancelled; waiting for new values)
 - [x] Clear copied remix migrations and verify an empty PostgreSQL migration scaffold without deleting app data
 - [ ] Make allowed payees optional and contractor-focused

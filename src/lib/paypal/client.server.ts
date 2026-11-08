@@ -142,3 +142,8 @@ export const sandboxPaypal = {
 };
 
 export type SandboxPaypal = typeof sandboxPaypal;
+
+/** Configuration check only: authenticates without creating an order or moving funds. */
+export async function verifySandboxCredentials(): Promise<void> {
+  await accessToken();
+}

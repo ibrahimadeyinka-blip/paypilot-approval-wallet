@@ -14,6 +14,32 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_ai_state: {
+        Row: {
+          owner_id: string
+          pause_reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          owner_id: string
+          pause_reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          owner_id?: string
+          pause_reason?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_ai_state_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_drafts: {
         Row: {
           amount_cents: number
@@ -799,6 +825,7 @@ export type Database = {
         Returns: boolean
       }
       get_delivery_link_info: { Args: { p_token_hash: string }; Returns: Json }
+      payrail_setup_checks: { Args: never; Returns: Json }
       record_agent_authorization: {
         Args: {
           p_attempt: number
