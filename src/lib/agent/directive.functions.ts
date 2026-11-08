@@ -1,10 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { normalizeDraft } from "./directive";
 import { paymentRequestSchema } from "./gateway-input";
-
-const MODEL = "openai/gpt-6-astra";
 
 const INSTRUCTIONS = `You are Payrail's purchasing agent. The owner gives you a directive like "Hire Alex Studio to design a minimalist blue tech logo. Budget is $100. Hold funds until delivery is verified."
 Turn it into one payment request draft.
