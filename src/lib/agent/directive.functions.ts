@@ -37,39 +37,22 @@ export const draftDirective = createServerFn({ method: "POST" })
     const token = await loadToken(context, data.tokenId);
     const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) throw new Error("AI is not configured.");
-    const [{ createOpenAI }, { generateText, jsonSchema, Output }] = await Promise.all([import("@ai-sdk/openai"), import("ai")]);
-    const provider = createOpenAI({ baseURL: "https://ai.gateway.lovable.dev/v1", apiKey, headers: { "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "vercel-ai-sdk" } });
-    const schema = jsonSchema({
-      type: "object",
-      additionalProperties: false,
-      required: ["ready", "question", "vendor_name", "merchant_handle", "amount_cents", "description", "delivery_requirements"],
-      properties: {
-        ready: { type: "boolean" }, question: { type: "string" }, vendor_name: { type: "string" }, merchant_handle: { type: "string" },
-        amount_cents: { type: "integer" }, description: { type: "string" }, delivery_requirements: { type: "string" },
-      },
-    });
-    let raw: unknown = null;
+    const { assertAiAccess, handleAiFailure } = await import("@/lib/ai/access.server");
+    await assertAiAccess(context.userId);
+    let agentResult;
     try {
-      const r = await generateText({
-        model: provider.responses(MODEL),
-        system: `${INSTRUCTIONS}\nAllowed payees: ${token.merchant_whitelist.length ? token.merchant_whitelist.join(", ") : "(any)"}\nThis token's single payment cap: $${(token.single_cap_cents / 100).toFixed(2)}.`,
-        messages: data.messages,
-        output: Output.object({ schema }),
-        maxRetries: 1,
-        providerOptions: { openai: { store: false } },
-      });
-      raw = r.output;
+      const { runPurchasingAgent } = await import("./autonomous.server");
+      agentResult = await runPurchasingAgent(apiKey, data.messages, token, INSTRUCTIONS);
     } catch (err) {
-      console.error("draftDirective failed", err);
-      throw new Error("The agent couldn't read that right now. Please try again.");
+      return handleAiFailure(context.userId, err);
     }
-    const draft = normalizeDraft(raw, token.merchant_whitelist);
+    const draft = agentResult.draft;
     // Analytics only: a failed insert must never block the owner's draft.
     const { error: logErr } = await context.supabase.from("agent_drafts").insert({
       owner_id: context.userId, token_id: token.id, ready: draft.ready, amount_cents: draft.amount_cents,
     });
     if (logErr) console.error("agent_drafts insert failed", logErr.message);
-    return draft;
+    return { ...draft, activity: agentResult.activity };
   });
 
 export const submitDirective = createServerFn({ method: "POST" })
@@ -77,6 +60,7 @@ export const submitDirective = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({
       tokenId: z.string().uuid(),
+      idempotencyKey: z.string().uuid(),
       directive: z.string().trim().min(10).max(2000),
       vendor_name: z.string(), merchant_handle: z.string(), amount_cents: z.number().int(), description: z.string(), delivery_requirements: z.string().max(2000),
     }).parse(d),
@@ -96,7 +80,7 @@ export const submitDirective = createServerFn({ method: "POST" })
       p_currency: b.currency,
       p_description: b.description,
       p_source_context: b.source_context,
-      p_idempotency_key: null as unknown as string,
+      p_idempotency_key: data.idempotencyKey,
     });
     if (error) throw new Error("Couldn't submit the request.");
     const r = res as { outcome: string; request_id?: string; status?: string; reason?: string | null };
