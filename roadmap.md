@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] Update remixed PayPal Client ID and Client Secret (secure form was cancelled; waiting for new values)
+- [x] Clear copied remix migrations and verify an empty PostgreSQL migration scaffold without deleting app data
 - [ ] Make allowed payees optional and contractor-focused
 - [ ] Upgrade Agent Chat to a conversational chat room with guarded draft cards
 - [ ] Replace Connect your agent with a live safety cockpit and verify wallet/chat flows
