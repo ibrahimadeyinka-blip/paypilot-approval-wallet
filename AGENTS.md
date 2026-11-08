@@ -30,6 +30,7 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Project rules
+- Agent Chat keeps drafts and messages in session-local React state; submission stays in the existing guarded server flow. Why: chat presentation must not bypass financial controls or imply that a chat draft moves funds.
 - History changes are recorded atomically by the request trigger in `agent_history`; audit tables are client-read-only. Why: declined and blocked requests need a trail even before a transaction exists, and users must not forge audit events.
 - MCP exposes read-only payments and history using verified OAuth caller tokens and RLS, never an admin client; browser tools read only the rendered ledger collection. Why: integrations must preserve ownership and cannot move funds or share credentials.
 - Ledger totals distinguish authorization holds, confirmed captures, unconfirmed captures, and released holds; exports neutralize spreadsheet formulas. Why: reserved money is not payment and merchant text is untrusted.
