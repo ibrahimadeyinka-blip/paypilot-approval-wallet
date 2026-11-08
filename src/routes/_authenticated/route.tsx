@@ -5,6 +5,14 @@ import { Button } from "@/components/ui/button";
 import { PayrailBrand } from "@/components/payrail-brand";
 
 export const Route = createFileRoute("/_authenticated")({
+  head: () => ({ meta: [
+    { title: "Workspace — Payrail" },
+    { name: "description", content: "Manage your agent spending limits, approvals, and payment history in Payrail." },
+    { property: "og:title", content: "Workspace — Payrail" },
+    { property: "og:description", content: "Your agent payment workspace with owner-controlled spending safeguards." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   ssr: false,
   beforeLoad: async ({ location }) => {
     const { data } = await supabase.auth.getUser();
