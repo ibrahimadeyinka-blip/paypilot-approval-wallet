@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
-import { KeyRound, LogOut, ShieldCheck, History, ReceiptText, ArrowUpRight, MessageSquare, BarChart3 } from "lucide-react";
+import { KeyRound, LogOut, ShieldCheck, History, ReceiptText, ArrowUpRight, MessageSquare, BarChart3, Settings2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { PayrailBrand } from "@/components/payrail-brand";
@@ -29,6 +29,7 @@ const links = [
   { to: "/history", label: "History", icon: History },
   { to: "/ledger", label: "Ledger", icon: ReceiptText },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/setup", label: "Setup", icon: Settings2 },
 ] as const;
 function AuthedLayout() {
   const navigate = useNavigate();

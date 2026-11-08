@@ -10,6 +10,8 @@ import { agentTokensQuery } from "@/lib/agent/tokens";
 import { draftDirective, submitDirective } from "@/lib/agent/directive.functions";
 import type { DirectiveDraft } from "@/lib/agent/directive";
 import { track } from "@/lib/analytics";
+import { Switch } from "@/components/ui/switch";
+import { canAutoSubmit } from "@/lib/agent/autonomous";
 
 export const Route = createFileRoute("/_authenticated/agent")({
   head: () => ({
@@ -26,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/agent")({
   component: AgentChat,
 });
 
-type Msg = { role: "user" | "assistant"; content: string; time: string; draft?: DirectiveDraft | undefined };
+type Msg = { role: "user" | "assistant"; content: string; time: string; draft?: DirectiveDraft | undefined; key?: string; activity?: string[] };
 const money = (c: number) => `$${(c / 100).toFixed(2)}`;
 const timestamp = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 const STARTERS = [
@@ -41,6 +43,7 @@ function AgentChat() {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [automatic, setAutomatic] = useState(false);
   const [sent, setSent] = useState<number | null>(null);
   const draft = useServerFn(draftDirective);
   const submit = useServerFn(submitDirective);
@@ -70,7 +73,18 @@ function AgentChat() {
       const d = await draft({ data: { tokenId, messages: next.map(({ role, content }) => ({ role, content })) } });
       track("project.agent_request_drafted", { ready: d.ready, amount_cents: d.amount_cents });
       qc.invalidateQueries({ queryKey: ["agent_analytics"] });
-      setMsgs([...next, { role: "assistant", time: timestamp(), content: d.ready ? `Here's a proposal for ${d.vendor_name}, at ${money(d.amount_cents)}. Nothing has been sent or paid yet.` : d.question, draft: d.ready ? d : undefined }]);
+      const key = crypto.randomUUID();
+      const response: Msg = { role: "assistant", time: timestamp(), content: d.ready ? `Here's a proposal for ${d.vendor_name}, at ${money(d.amount_cents)}. Nothing has been paid.` : d.question, draft: d.ready ? d : undefined, key, activity: d.activity };
+      setMsgs([...next, response]);
+      if (canAutoSubmit(automatic, d)) {
+        const directive = next.filter((m) => m.role === "user").map((m) => m.content).join("\n").slice(-2000);
+        const r = await submit({ data: { tokenId, idempotencyKey: key, directive, ...d } });
+        setSent(next.length);
+        setMsgs([...next, response, { role: "assistant", time: timestamp(), content: r.status === "blocked" ? `Blocked by your safeguards: ${r.reason}. No money moved.` : "Automatically submitted for owner approval. Open Approvals to authorize the PayPal hold. No funds moved." }]);
+        track(r.status === "blocked" ? "project.agent_request_blocked" : "project.agent_request_sent", { amount_cents: d.amount_cents });
+        qc.invalidateQueries({ queryKey: ["agent_payment_requests"] });
+        qc.invalidateQueries({ queryKey: ["agent_analytics"] });
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Something went wrong");
     } finally { setBusy(false); }
@@ -81,7 +95,7 @@ function AgentChat() {
     setBusy(true);
     try {
       const directive = msgs.filter((m) => m.role === "user").map((m) => m.content).join("\n");
-      const r = await submit({ data: { tokenId, directive, ...d } });
+      const r = await submit({ data: { tokenId, idempotencyKey: msgs[i]?.key ?? crypto.randomUUID(), directive: directive.slice(-2000), ...d } });
       setSent(i);
       track(r.status === "blocked" ? "project.agent_request_blocked" : "project.agent_request_sent", { amount_cents: d.amount_cents });
       qc.invalidateQueries({ queryKey: ["agent_analytics"] });
@@ -101,12 +115,13 @@ function AgentChat() {
       ) : (
         <section className="chat-room overflow-hidden rounded-lg border bg-card">
           <header className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-4 sm:px-6">
-            <div className="flex items-center gap-3"><span className="flex size-10 items-center justify-center rounded-md bg-ink text-highlight"><Bot className="size-5" /></span><div><h2 className="text-sm font-semibold">Purchasing agent</h2><p className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground"><span className="size-1.5 rounded-full bg-signal" />{busy ? "Working on your request" : "Ready for your directive"}</p></div></div>
+            <div className="flex items-center gap-3"><span className="flex size-10 items-center justify-center rounded-md bg-ink text-highlight"><Bot className="size-5" /></span><div><h2 className="text-sm font-semibold">Purchasing agent · Lovable AI</h2><p className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground"><span className="size-1.5 rounded-full bg-signal" />{busy ? "Checking policy and preparing request" : "Ready for your directive"}</p></div></div>
             <Button type="button" variant="ghost" size="icon" title="Clear chat" aria-label="Clear chat" disabled={busy || !msgs.length} onClick={clearChat}><RotateCcw /></Button>
           </header>
           <div className="border-b bg-muted/40 px-4 py-3 sm:px-6">
             <label className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">Agent token<select aria-label="Agent token" disabled={busy} value={tokenId} onChange={(e) => { setTokenId(e.target.value); clearChat(); }} className="min-w-0 max-w-full flex-1 rounded-md border bg-card px-2 py-1.5 text-xs text-foreground">{active.map((t) => <option key={t.id} value={t.id}>{t.label} · {money(t.single_cap_cents)} per payment · {money(t.daily_cap_cents)} / 24h</option>)}</select></label>
             {token && <p className="mt-2 break-words text-[11px] leading-relaxed text-muted-foreground">Payees: {token.merchant_whitelist.length ? token.merchant_whitelist.join(", ") : "Any contractor"} · Expires {new Date(token.expires_at).toLocaleDateString()}</p>}
+            <div className="mt-3 flex flex-wrap items-center gap-3"><Switch id="automatic" checked={automatic} onCheckedChange={setAutomatic} disabled={busy} /><label htmlFor="automatic" className="text-xs">Submit complete requests automatically</label><span className="text-[10px] text-muted-foreground">PayPal holds still need your approval</span></div>
           </div>
           <div ref={stream} role="log" aria-label="Conversation" aria-live="polite" className="chat-stream space-y-6 overflow-y-auto px-4 py-6 sm:px-6">
             {msgs.length === 0 && <div className="flex h-full flex-col items-center justify-center py-8 text-center"><span className="mb-5 flex size-14 items-center justify-center rounded-full bg-accent text-accent-foreground"><Sparkles className="size-6" /></span><h2 className="font-display text-2xl font-semibold">What are we making?</h2><p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">A contractor, a budget, a clear deliverable.<br />Every payment stays on your rails.</p><div className="mt-7 flex flex-wrap justify-center gap-2">{STARTERS.map((s) => <Button key={s.label} variant="outline" size="sm" onClick={() => { setInput(s.text); composer.current?.focus(); }}><Sparkles />{s.label}<ArrowUpRight /></Button>)}</div></div>}
@@ -116,6 +131,7 @@ function AgentChat() {
                 <div className="min-w-0 max-w-[88%] text-sm sm:max-w-[80%]">
                   <div className={`rounded-lg px-4 py-3 ${m.role === "user" ? "bg-ink text-ink-foreground" : "bg-muted/60 text-foreground"}`}><p className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</p></div>
                   <p className={`mt-1.5 text-[10px] text-muted-foreground ${m.role === "user" ? "text-right" : ""}`}>{m.role === "user" ? "You" : "Payrail"} · {m.time}</p>
+                  {m.activity?.map((step) => <p key={step} className="mt-2 flex items-center gap-1.5 text-[10px] text-signal"><ShieldCheck className="size-3" />{step}</p>)}
                   {m.draft && (
                     <div className="mt-3 overflow-hidden rounded-md border text-xs">
                       <div className="flex items-center gap-2 border-b bg-accent px-4 py-3 font-medium text-accent-foreground"><FileCheck2 className="size-4" />Proof-of-source proposal</div>

@@ -30,6 +30,8 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Project rules
+- Owner-started AI runs use bounded read/proposal tools; automatic submission calls the guarded payment RPC with a stable per-proposal idempotency key, never PayPal approval tools. Why: real agent execution cannot bypass owner authorization or duplicate a request.
+- Setup diagnostics expose only safe boolean checks and server-generated reports; persist AI access denials per owner in agent_ai_state. Why: configuration assistance must not leak credentials or retry denied calls.
 - Agent Chat keeps drafts and messages in session-local React state; submission stays in the existing guarded server flow. Why: chat presentation must not bypass financial controls or imply that a chat draft moves funds.
 - History changes are recorded atomically by the request trigger in `agent_history`; audit tables are client-read-only. Why: declined and blocked requests need a trail even before a transaction exists, and users must not forge audit events.
 - MCP exposes read-only payments and history using verified OAuth caller tokens and RLS, never an admin client; browser tools read only the rendered ledger collection. Why: integrations must preserve ownership and cannot move funds or share credentials.
