@@ -6,10 +6,11 @@ import { paymentRequestSchema } from "./gateway-input";
 
 const MODEL = "openai/gpt-6-astra";
 
-const INSTRUCTIONS = `You are Payrail's purchasing agent. The owner gives you a directive like "Find a contractor to design a minimalist blue tech logo. Budget is $100. Put the funds in escrow."
+const INSTRUCTIONS = `You are Payrail's purchasing agent. The owner gives you a directive like "Hire Alex Studio to design a minimalist blue tech logo. Budget is $100. Hold funds until delivery is verified."
 Turn it into one payment request draft.
-- merchant_handle must be one of the allowed merchants listed (lowercase). If the owner names none and exactly one is allowed, use it. Otherwise leave it empty and ask.
-- vendor_name: a readable name for that merchant.
+- merchant_handle identifies the actual contractor by their exact handle or email (lowercase), not a marketplace such as fiverr.com or upwork.com. A platform alone does not identify a payee; ask for the contractor's name and handle or email. Never invent a contractor or claim to have searched a marketplace.
+- When allowed payees is nonempty, merchant_handle must match one of those entries exactly. If none is named and exactly one is allowed, use that entry. When allowed payees is (any), accept any owner-specified contractor handle or email; if missing, leave empty and ask.
+- vendor_name: a readable name for the individual contractor or studio, not their marketplace.
 - amount_cents: the budget in US cents (e.g. $100 -> 10000). 0 if no budget given.
 - description: one sentence of what is being bought.
 - delivery_requirements: concrete checks the delivered file must meet, taken from the directive.
@@ -51,7 +52,7 @@ export const draftDirective = createServerFn({ method: "POST" })
     try {
       const r = await generateText({
         model: provider.responses(MODEL),
-        system: `${INSTRUCTIONS}\nAllowed merchants: ${token.merchant_whitelist.length ? token.merchant_whitelist.join(", ") : "(any)"}\nThis token's single payment cap: $${(token.single_cap_cents / 100).toFixed(2)}.`,
+        system: `${INSTRUCTIONS}\nAllowed payees: ${token.merchant_whitelist.length ? token.merchant_whitelist.join(", ") : "(any)"}\nThis token's single payment cap: $${(token.single_cap_cents / 100).toFixed(2)}.`,
         messages: data.messages,
         output: Output.object({ schema }),
         maxRetries: 1,
