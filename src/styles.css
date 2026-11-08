@@ -275,6 +275,9 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.035em; }
 }
 .payment-grid { height: 620px; }
 .audit-grid { height: 360px; }
+.chat-main { max-width: 1050px; }
+.chat-room { display: flex; flex-direction: column; height: 760px; max-height: 85svh; min-height: 540px; }
+.chat-stream { flex: 1; min-height: 0; overscroll-behavior: contain; }
 .payrail-grid .ag-cell { display: flex; align-items: center; }
 .payrail-grid .ag-cell-wrap-text { align-items: flex-start; padding-top: 10px; padding-bottom: 10px; }
 @keyframes bar { from { transform: scaleY(0); } }

@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { Ban, Check, Copy, KeyRound, ShieldCheck, Wallet as WalletIcon, ArrowUpRight, Activity, Clock } from "lucide-react";
+import { Ban, Check, Copy, KeyRound, ShieldCheck, ArrowUpRight, Activity, ScanEye, LockKeyhole, MessageSquare, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,10 +56,6 @@ function Wallet() {
   async function issue(e: FormEvent) {
     e.preventDefault();
     const list = parseMerchantList(merchants);
-    if (list.length === 0) {
-      toast.error("Add at least one approved merchant.");
-      return;
-    }
     const single = dollarsToCents(singleCap);
     const daily = dollarsToCents(dailyCap);
     const capError = validateCaps(single, daily);
@@ -67,9 +63,10 @@ function Wallet() {
       toast.error(capError);
       return;
     }
+    if (single === null || daily === null) return;
     setBusy(true);
     try {
-      const { secret } = await issueAgentToken(label.trim(), lifetime, list, single!, daily!);
+      const { secret } = await issueAgentToken(label.trim(), lifetime, list, single, daily);
       setSecret(secret);
       setLabel("");
       setMerchants("");
@@ -91,8 +88,14 @@ function Wallet() {
     }
   }
 
-  const endpoint = typeof window !== "undefined" ? `${window.location.origin}/api/public/agent-gateway` : "/api/public/agent-gateway";
   const now = Date.now();
+  const activeTokens = tokens.filter((t) => !t.revoked && new Date(t.expires_at).getTime() > now);
+  const stages = [
+    { name: "Owner approval", icon: ShieldCheck, statuses: ["pending_approval"], description: "Every request starts with your decision." },
+    { name: "PayPal hold", icon: LockKeyhole, statuses: ["authorizing", "authorized"], description: "Authorized funds stay on hold, not paid out." },
+    { name: "Delivery review", icon: ScanEye, statuses: ["capture_failed"], description: "Private delivery. AI checks the requirements." },
+    { name: "Settlement", icon: CheckCircle2, statuses: ["captured", "voided"], description: "Verified work is paid; released holds aren't." },
+  ];
 
   return (
     <main className="app-main space-y-9">
@@ -137,8 +140,9 @@ function Wallet() {
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="merchants">Approved merchants</Label>
-          <Input id="merchants" placeholder="figma.com, upwork.com" value={merchants} onChange={(e) => setMerchants(e.target.value)} required />
+          <Label htmlFor="merchants">Allowed payees <span className="font-normal text-muted-foreground">(optional)</span></Label>
+          <Input id="merchants" placeholder="@designer, alex@studio.io" aria-describedby="payee-help" value={merchants} onChange={(e) => setMerchants(e.target.value)} />
+          <p id="payee-help" className="max-w-lg text-xs leading-relaxed text-muted-foreground">Leave blank for any contractor within your limits, subject to your approval. To restrict this token, enter exact contractor handles or emails, separated by commas—not marketplace websites. This list does not set the PayPal payment recipient.</p>
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:col-span-2">
           <div className="space-y-1.5">
@@ -171,7 +175,7 @@ function Wallet() {
                     {t.revoked ? <Badge variant="destructive">Revoked</Badge> : expired ? <Badge variant="secondary">Expired</Badge> : <Badge>Active</Badge>}
                   </div>
                   <div className="break-words font-mono text-xs leading-relaxed text-muted-foreground">
-                    {t.token_prefix}… · max {usd(t.single_cap_cents)}/payment · {usd(t.daily_cap_cents)}/24h · expires {new Date(t.expires_at).toLocaleString()} · {t.merchant_whitelist.join(", ") || "no merchants"}
+                    {t.token_prefix}… · max {usd(t.single_cap_cents)}/payment · {usd(t.daily_cap_cents)}/24h · expires {new Date(t.expires_at).toLocaleString()} · {t.merchant_whitelist.join(", ") || "Any contractor · spending limits apply"}
                   </div>
                 </div>
                 {!t.revoked && !expired && (
@@ -205,18 +209,26 @@ function Wallet() {
         </ul>
       </section>
 
-      <section className="space-y-2">
-        <h2 className="section-heading">Connect your agent</h2>
-        <pre className="overflow-x-auto rounded-md border bg-card p-4 font-mono text-xs leading-relaxed">{`curl -X POST ${endpoint} \\
-  -H "Authorization: Bearer apt_..." \\
-  -H "Idempotency-Key: order-1234" \\
-  -H "Content-Type: application/json" \\
-  -d '{"vendor_name":"Figma","merchant_handle":"figma.com","amount_cents":1500,
-       "currency":"USD","description":"Pro seat for May",
-       "source_context":"Invoice #881: Figma Pro, 1 seat, $15.00"}'`}</pre>
-        <p className="text-xs text-muted-foreground">
-          Retrying with the same Idempotency-Key returns the original result instead of creating a duplicate.
-        </p>
+      <section className="space-y-6 border-t pt-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div><span className="eyebrow">Your money, on rails</span><h2 className="mt-3 font-display text-2xl font-semibold">Agent Safety Cockpit</h2></div>
+          <span className="flex items-center gap-2 text-xs text-accent-foreground"><span className="size-2 rounded-full bg-signal" />{activeTokens.length} active {activeTokens.length === 1 ? "token" : "tokens"}</span>
+        </div>
+        <div className="grid gap-0 border-y sm:grid-cols-2 xl:grid-cols-4">
+          {stages.map(({ name, icon: Icon, statuses, description }, i) => (
+            <div key={name} className="border-b px-3 py-5 last:border-b-0 sm:px-5 xl:border-b-0 xl:border-r xl:last:border-r-0">
+              <div className="flex items-center justify-between"><Icon className="size-5 text-signal" /><span className="font-mono text-[10px] text-muted-foreground">0{i + 1}</span></div>
+              <h3 className="mt-4 text-sm font-semibold">{name}</h3>
+              <p className="mt-2 min-h-10 text-xs leading-relaxed text-muted-foreground">{description}</p>
+              {i !== 2 && <p className="mt-4 font-mono text-xs">{requests.filter((r) => statuses.includes(r.status)).length} {i === 3 ? "completed" : "requests"}</p>}
+              {i === 2 && <p className="mt-4 font-mono text-xs text-muted-foreground">Review details in Approvals</p>}
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-5">
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">{["Per-payment caps", "Rolling 24h limits", "Owner approval"].map((name) => <span key={name} className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-signal" />{name}</span>)}<span className="w-full text-[10px]">Request counts reflect the most recent {requests.length} requests.</span></div>
+          <Button asChild variant="highlight"><Link to={activeTokens.length ? "/agent" : "/wallet"}><MessageSquare />{activeTokens.length ? "Open Agent Chat Room" : "Issue a token to start"}<ArrowUpRight /></Link></Button>
+        </div>
       </section>
     </main>
   );

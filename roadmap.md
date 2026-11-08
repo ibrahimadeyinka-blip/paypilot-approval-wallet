@@ -1,4 +1,7 @@
 # Roadmap
+- [ ] Make allowed payees optional and contractor-focused
+- [ ] Upgrade Agent Chat to a conversational chat room with guarded draft cards
+- [ ] Replace Connect your agent with a live safety cockpit and verify wallet/chat flows
 - [ ] Activate AG Grid Community in History and Ledger, preserving audit details and safe CSV exports
 - [ ] Configure existing PayPal Sandbox credentials securely (rotate secret exposed in chat)
 - [x] Revamp all Payrail screens with reference-inspired design, typography, motion, and a custom favicon; preserve payment logic (public desktop/mobile checks passed)
