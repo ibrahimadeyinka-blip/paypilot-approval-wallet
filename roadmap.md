@@ -1,4 +1,7 @@
 # Roadmap
+- [ ] Add owner-started autonomous purchasing runs that submit requests without bypassing payment approval
+- [ ] Verify blank-payee payment guardrails against the remixed database
+- [ ] Add signed-in setup checklist with PayPal, schema, migration and AI-assisted configuration checks
 - [ ] Update remixed PayPal Client ID and Client Secret (secure form was cancelled; waiting for new values)
 - [x] Clear copied remix migrations and verify an empty PostgreSQL migration scaffold without deleting app data
 - [ ] Make allowed payees optional and contractor-focused
