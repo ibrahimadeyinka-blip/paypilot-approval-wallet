@@ -15,7 +15,9 @@ export const Route = createFileRoute("/_authenticated")({
   ] }),
   ssr: false,
   beforeLoad: async ({ location }) => {
-    const { data } = await supabase.auth.getUser();
+    // Local session read (no network round-trip); server functions still verify the token.
+    const { data: { session } } = await supabase.auth.getSession();
+    const data = { user: session?.user ?? null };
     if (!data.user) throw redirect({ to: "/auth", search: { redirect: location.href } });
     return { user: data.user };
   },
