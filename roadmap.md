@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Restore signup profile creation, repair missing existing profiles, and verify signed-in token issuance
 - [x] Add owner-started AI tool runs and opt-in automatic guarded submission (live policy/proposal tool calls passed)
 - [x] Verify blank-payee approval guardrails and submission definition against the remixed database ($10 allowed, $10.01 blocked, unlisted restricted payee blocked)
 - [x] Add signed-in setup checklist with PayPal, applied schema and AI-assisted configuration checks (live AI explanation passed)
