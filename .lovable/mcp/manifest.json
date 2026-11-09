@@ -19,7 +19,7 @@
       {
         "name": "list_payments",
         "title": "List payments",
-        "description": "List the connected account's latest agent payment requests and PayPal Sandbox references.",
+        "description": "List the connected account's latest agent payment requests and NEAR testnet escrow references.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
