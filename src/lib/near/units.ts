@@ -23,3 +23,8 @@ export const formatNear = (cents: number) => `${(cents / 100).toLocaleString("en
 
 export const txUrl = (hash: string) => `${EXPLORER}/txns/${hash}`;
 export const accountUrl = (id: string) => `${EXPLORER}/address/${id}`;
+
+/** Payees on testnet must be a named .testnet account or a 64-hex implicit account. */
+export function isTestnetPayee(id: string): boolean {
+  return isNearAccountId(id) && (id.endsWith(".testnet") || /^[0-9a-f]{64}$/.test(id));
+}

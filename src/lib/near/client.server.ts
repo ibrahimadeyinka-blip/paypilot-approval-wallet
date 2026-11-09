@@ -12,7 +12,7 @@ import { Account } from "@near-js/accounts";
 import { JsonRpcProvider } from "@near-js/providers";
 import { KeyPairSigner } from "@near-js/signers";
 import { PaypalError, type PaypalAuthorization } from "@/lib/paypal/parse";
-import { isNearAccountId, centsToYocto, NEAR_RPC_URL } from "./units";
+import { isNearAccountId, isTestnetPayee, centsToYocto, NEAR_RPC_URL } from "./units";
 
 const GAS_RESERVE_YOCTO = 50_000_000_000_000_000_000_000n; // 0.05 NEAR kept for fees
 const HOLD_DAYS = 29;
@@ -93,7 +93,7 @@ export const nearEscrow = {
     const { accountId } = config();
     const req = await requestBy("paypal_order_id", orderId);
     const payee = (req.merchant_handle ?? "").trim().toLowerCase();
-    if (!isNearAccountId(payee)) {
+    if (!isTestnetPayee(payee)) {
       throw new PaypalError("api", `"${payee}" is not a NEAR account. Payees must be accounts like designer.testnet.`);
     }
     try {
@@ -131,7 +131,7 @@ export const nearEscrow = {
     const { accountId, key } = config();
     const req = await requestBy("paypal_authorization_id", authorizationId);
     const payee = (req.merchant_handle ?? "").trim().toLowerCase();
-    if (!isNearAccountId(payee)) throw new PaypalError("api", `"${payee}" is not a NEAR account.`);
+    if (!isTestnetPayee(payee)) throw new PaypalError("api", `"${payee}" is not a NEAR account.`);
     try {
       const signer = KeyPairSigner.fromSecretKey(key as `ed25519:${string}`);
       const account = new Account(accountId, provider(), signer);

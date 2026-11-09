@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isNearAccountId } from "@/lib/near/units";
+import { isTestnetPayee } from "@/lib/near/units";
 
 /** What the AI drafts from the owner's chat directive. The owner confirms before anything is sent. */
 export const directiveDraftSchema = z.object({
@@ -21,7 +21,7 @@ export function normalizeDraft(raw: unknown, allowlist: string[]): DirectiveDraf
   }
   const d = { ...parsed.data, merchant_handle: parsed.data.merchant_handle.trim().toLowerCase() };
   const allowed = allowlist.length === 0 || allowlist.includes(d.merchant_handle);
-  if (d.merchant_handle && !isNearAccountId(d.merchant_handle)) {
+  if (d.merchant_handle && !isTestnetPayee(d.merchant_handle)) {
     return { ...d, ready: false, question: `"${d.merchant_handle}" isn't a NEAR account. What is the contractor's NEAR testnet account (for example designer.testnet)?` };
   }
   if (!d.merchant_handle || !allowed) {
