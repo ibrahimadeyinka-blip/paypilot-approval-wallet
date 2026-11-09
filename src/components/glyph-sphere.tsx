@@ -14,7 +14,7 @@ export function GlyphSphere({ className }: { className?: string }) {
       const y = 1 - (i / (N - 1)) * 2;
       const r = Math.sqrt(1 - y * y);
       const t = i * 2.399963;
-      return { x: Math.cos(t) * r, y, z: Math.sin(t) * r, c: word[i % word.length] };
+      return { x: Math.cos(t) * r, y, z: Math.sin(t) * r, c: word[i % word.length] ?? "N" };
     });
     const styles = getComputedStyle(canvas);
     const fg = styles.getPropertyValue("--foreground").trim() || "#333";
