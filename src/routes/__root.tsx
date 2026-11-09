@@ -81,7 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Payrail — guarded payments for AI agents" },
+      { title: "Vigil — guarded payments for AI agents" },
       { name: "description", content: "Give AI agents limited, revocable payment tokens with server-enforced spending limits." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

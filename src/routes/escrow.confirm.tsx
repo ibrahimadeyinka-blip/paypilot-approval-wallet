@@ -19,9 +19,9 @@ export const Route = createFileRoute("/escrow/confirm")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { title: "Confirming your NEAR escrow lock — Payrail" },
-      { name: "description", content: "Payrail is confirming the NEAR testnet escrow lock you approved." },
-      { property: "og:title", content: "Confirming your NEAR escrow lock — Payrail" },
+      { title: "Confirming your NEAR escrow lock — Vigil" },
+      { name: "description", content: "Vigil is confirming the NEAR testnet escrow lock you approved." },
+      { property: "og:title", content: "Confirming your NEAR escrow lock — Vigil" },
       { property: "og:description", content: "Confirming a NEAR testnet escrow lock." },
       { name: "robots", content: "noindex" },
     ],

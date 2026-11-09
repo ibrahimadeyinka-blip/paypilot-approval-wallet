@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { checkSetup, explainSetup } from "@/lib/setup/setup.functions";
 
 export const Route = createFileRoute("/_authenticated/setup")({
-  head: () => ({ meta: [{ title: "Setup checks — Payrail" }, { name: "description", content: "Verify the NEAR testnet escrow account, database readiness, and agent payment safeguards." }, { property: "og:title", content: "Setup checks — Payrail" }, { property: "og:description", content: "Check your payment workspace and get AI-assisted configuration guidance." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Setup checks — Vigil" }, { name: "description", content: "Verify the NEAR testnet escrow account, database readiness, and agent payment safeguards." }, { property: "og:title", content: "Setup checks — Vigil" }, { property: "og:description", content: "Check your payment workspace and get AI-assisted configuration guidance." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Setup,
 });
 

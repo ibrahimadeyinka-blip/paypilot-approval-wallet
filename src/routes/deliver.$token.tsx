@@ -15,9 +15,9 @@ export const Route = createFileRoute("/deliver/$token")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { title: "Deliver your work — Payrail" },
+      { title: "Deliver your work — Vigil" },
       { name: "description", content: "Upload the finished work for a payment that is on hold." },
-      { property: "og:title", content: "Deliver your work — Payrail" },
+      { property: "og:title", content: "Deliver your work — Vigil" },
       { property: "og:description", content: "Upload the finished work for a payment that is on hold." },
       { name: "robots", content: "noindex" },
     ],

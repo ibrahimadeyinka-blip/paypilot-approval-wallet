@@ -6,9 +6,9 @@ import { PayrailBrand } from "@/components/payrail-brand";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
-    { title: "Payrail — Let AI agents pay. On your rails." },
+    { title: "Vigil — Let AI agents pay. On your rails." },
     { name: "description", content: "Give AI agents a spending token with your own caps, budgets and approved NEAR accounts. You approve, NEAR testnet escrow holds the funds, AI checks the work, then it releases on-chain." },
-    { property: "og:title", content: "Payrail — Let AI agents pay. On your rails." },
+    { property: "og:title", content: "Vigil — Let AI agents pay. On your rails." },
     { property: "og:description", content: "Spending tokens, owner approval, NEAR escrow and AI-verified on-chain release for AI agents." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
   ] }), component: Index,
@@ -36,7 +36,7 @@ function Index() {
   return <main className="overflow-x-hidden bg-background">
     <header className="sticky top-0 z-30 border-b border-transparent bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-        <Link to="/" aria-label="Payrail home"><PayrailBrand /></Link>
+        <Link to="/" aria-label="Vigil home"><PayrailBrand /></Link>
         <nav className="hidden items-center gap-7 text-sm text-muted-foreground md:flex"><a href="#how" className="hover:text-foreground">How it works</a><a href="#guardrails" className="hover:text-foreground">Guardrails</a><Link to="/analytics" className="hover:text-foreground">Analytics</Link></nav>
         <div className="flex items-center gap-2"><Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex"><Link to="/auth">Sign in</Link></Button><Button asChild size="sm"><Link to="/wallet">Open wallet</Link></Button></div>
       </div>

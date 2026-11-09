@@ -16,9 +16,9 @@ import { canAutoSubmit } from "@/lib/agent/autonomous";
 export const Route = createFileRoute("/_authenticated/agent")({
   head: () => ({
     meta: [
-      { title: "Agent Chat — Payrail" },
+      { title: "Agent Chat — Vigil" },
       { name: "description", content: "Tell your agent what to buy; it drafts a guarded payment request for your approval." },
-      { property: "og:title", content: "Agent Chat — Payrail" },
+      { property: "og:title", content: "Agent Chat — Vigil" },
       { property: "og:description", content: "Give your purchasing agent a directive and budget." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -130,7 +130,7 @@ function AgentChat() {
                 <span className={`mt-1 flex size-7 shrink-0 items-center justify-center rounded-full ${m.role === "user" ? "bg-muted text-foreground" : "bg-accent text-accent-foreground"}`}>{m.role === "user" ? <User className="size-4" /> : <Bot className="size-4" />}</span>
                 <div className="min-w-0 max-w-[88%] text-sm sm:max-w-[80%]">
                   <div className={`rounded-lg px-4 py-3 ${m.role === "user" ? "bg-ink text-ink-foreground" : "bg-muted/60 text-foreground"}`}><p className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</p></div>
-                  <p className={`mt-1.5 text-[10px] text-muted-foreground ${m.role === "user" ? "text-right" : ""}`}>{m.role === "user" ? "You" : "Payrail"} · {m.time}</p>
+                  <p className={`mt-1.5 text-[10px] text-muted-foreground ${m.role === "user" ? "text-right" : ""}`}>{m.role === "user" ? "You" : "Vigil"} · {m.time}</p>
                   {m.activity?.map((step) => <p key={step} className="mt-2 flex items-center gap-1.5 text-[10px] text-signal"><ShieldCheck className="size-3" />{step}</p>)}
                   {m.draft && (
                     <div className="mt-3 overflow-hidden rounded-md border text-xs">

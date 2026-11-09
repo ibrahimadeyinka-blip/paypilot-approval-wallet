@@ -95,7 +95,7 @@ export const sandboxPaypal = {
       payment_source: {
         paypal: {
           experience_context: {
-            brand_name: "Payrail",
+            brand_name: "Vigil",
             shipping_preference: "NO_SHIPPING",
             user_action: "CONTINUE",
             return_url: input.returnUrl,

@@ -6,9 +6,9 @@ import { PayrailBrand } from "@/components/payrail-brand";
 
 export const Route = createFileRoute("/_authenticated")({
   head: () => ({ meta: [
-    { title: "Workspace — Payrail" },
-    { name: "description", content: "Manage your agent spending limits, approvals, and payment history in Payrail." },
-    { property: "og:title", content: "Workspace — Payrail" },
+    { title: "Workspace — Vigil" },
+    { name: "description", content: "Manage your agent spending limits, approvals, and payment history in Vigil." },
+    { property: "og:title", content: "Workspace — Vigil" },
     { property: "og:description", content: "Your agent payment workspace with owner-controlled spending safeguards." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
@@ -41,8 +41,8 @@ function AuthedLayout() {
       <div className="flex items-center justify-between px-5 py-6 lg:px-7 lg:py-9"><Link to="/"><PayrailBrand /></Link><span className="rounded border px-2 py-1 font-mono text-[9px] text-muted-foreground lg:hidden">TESTNET</span></div>
       <div className="hidden px-7 pb-4 font-mono text-[10px] text-muted-foreground lg:block">WORKSPACE</div>
       <nav aria-label="Workspace navigation" className="grid grid-cols-3 gap-1 px-3 sm:grid-cols-6 pb-4 lg:grid-cols-1 lg:px-4">{links.map(({to,label,icon: Icon}) => <Link key={to} to={to} className="flex flex-col items-center gap-2 rounded-md px-2 py-3 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:flex-row lg:gap-3 lg:px-3 lg:text-sm" activeProps={{className:"bg-ink text-ink-foreground hover:bg-ink hover:text-ink-foreground"}}><Icon className="size-[18px]" />{label}</Link>)}</nav>
-      <div className="mt-auto hidden space-y-5 px-6 pb-6 lg:block"><div className="border-t pt-5"><div className="flex items-center gap-2 text-xs font-medium"><span className="size-1.5 rounded-full bg-primary" /> NEAR Testnet</div><p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">Escrow holds.<br />On-chain release after review.</p></div><Link to="/" className="flex items-center justify-between text-xs text-muted-foreground">About Payrail <ArrowUpRight className="size-3.5" /></Link></div>
+      <div className="mt-auto hidden space-y-5 px-6 pb-6 lg:block"><div className="border-t pt-5"><div className="flex items-center gap-2 text-xs font-medium"><span className="size-1.5 rounded-full bg-primary" /> NEAR Testnet</div><p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">Escrow holds.<br />On-chain release after review.</p></div><Link to="/" className="flex items-center justify-between text-xs text-muted-foreground">About Vigil <ArrowUpRight className="size-3.5" /></Link></div>
     </aside>
-    <div className="min-w-0"><header className="flex h-16 items-center justify-between gap-3 border-b px-5 lg:px-9"><span className="font-mono text-[10px] text-muted-foreground">PAYRAIL / CONSOLE</span><div className="flex min-w-0 items-center gap-3"><span className="hidden max-w-56 truncate text-xs text-muted-foreground sm:block">{user.email}</span><Button variant="ghost" size="sm" onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/auth" }); }}><LogOut className="size-4" /><span className="hidden sm:inline">Sign out</span></Button></div></header><div className="animate-enter"><Outlet /></div></div>
+    <div className="min-w-0"><header className="flex h-16 items-center justify-between gap-3 border-b px-5 lg:px-9"><span className="font-mono text-[10px] text-muted-foreground">VIGIL / CONSOLE</span><div className="flex min-w-0 items-center gap-3"><span className="hidden max-w-56 truncate text-xs text-muted-foreground sm:block">{user.email}</span><Button variant="ghost" size="sm" onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/auth" }); }}><LogOut className="size-4" /><span className="hidden sm:inline">Sign out</span></Button></div></header><div className="animate-enter"><Outlet /></div></div>
   </div>;
 }

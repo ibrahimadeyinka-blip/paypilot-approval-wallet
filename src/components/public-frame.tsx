@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 export function PublicFrame({ children }: { children: React.ReactNode }) {
   return <div className="public-frame min-h-screen bg-background">
     <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
-      <Link to="/" aria-label="Payrail home"><PayrailBrand /></Link>
+      <Link to="/" aria-label="Vigil home"><PayrailBrand /></Link>
       <Button asChild variant="ghost" size="sm"><Link to="/wallet">Agent wallet <ArrowUpRight /></Link></Button>
     </header>
     <div className="public-workspace mx-auto grid max-w-6xl gap-6 px-5 sm:px-8 lg:grid-cols-2">
@@ -22,6 +22,6 @@ export function PublicFrame({ children }: { children: React.ReactNode }) {
       </section>
       <section className="flex items-center justify-center py-12 sm:px-8 lg:px-12"><div className="w-full max-w-sm animate-enter">{children}</div></section>
     </div>
-    <footer className="mx-auto flex max-w-6xl flex-wrap justify-between gap-3 px-5 py-6 font-mono text-[11px] text-muted-foreground sm:px-8"><span>payrail · agent payment rails</span><span className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-signal" /> NEAR Testnet</span></footer>
+    <footer className="mx-auto flex max-w-6xl flex-wrap justify-between gap-3 px-5 py-6 font-mono text-[11px] text-muted-foreground sm:px-8"><span>vigil · escrow rails for agents</span><span className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-signal" /> NEAR Testnet</span></footer>
   </div>;
 }
