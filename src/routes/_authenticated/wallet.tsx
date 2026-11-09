@@ -50,8 +50,8 @@ function Wallet() {
   const [label, setLabel] = useState("");
   const [lifetime, setLifetime] = useState(7);
   const [merchants, setMerchants] = useState("");
-  const [singleCap, setSingleCap] = useState("100");
-  const [dailyCap, setDailyCap] = useState("500");
+  const [singleCap, setSingleCap] = useState("10");
+  const [dailyCap, setDailyCap] = useState("50");
   const [busy, setBusy] = useState(false);
   const [secret, setSecret] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -147,7 +147,7 @@ function Wallet() {
         <div className="space-y-1.5">
           <Label htmlFor="merchants">Allowed payees <span className="font-normal text-muted-foreground">(optional)</span></Label>
           <Input id="merchants" placeholder="designer.testnet, alex.testnet" aria-describedby="payee-help" value={merchants} onChange={(e) => setMerchants(e.target.value)} />
-          <p id="payee-help" className="max-w-lg text-xs leading-relaxed text-muted-foreground">Leave blank for any contractor within your limits, subject to your approval. To restrict this token, enter exact contractor handles or emails, separated by commas—not marketplace websites. This list does not set the PayPal payment recipient.</p>
+          <p id="payee-help" className="max-w-lg text-xs leading-relaxed text-muted-foreground">Leave blank for any contractor within your limits, subject to your approval. To restrict this token, enter exact NEAR testnet accounts (like designer.testnet), separated by commas. Released NEAR goes to the account named in each request.</p>
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:col-span-2">
           <div className="space-y-1.5">
