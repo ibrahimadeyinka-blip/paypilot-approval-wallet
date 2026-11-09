@@ -1,20 +1,5 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1794133509343,
-      "tag": "0000_agent_setup_checks",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1794141988055,
-      "tag": "0001_restore_signup_profile_trigger",
-      "breakpoints": true
-    }
-  ]
+  "entries": []
 }
