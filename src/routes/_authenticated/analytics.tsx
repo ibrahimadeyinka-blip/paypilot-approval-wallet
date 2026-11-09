@@ -4,9 +4,9 @@ import { analyticsQuery, daily, funnel, type BlockKind } from "@/lib/analytics";
 
 export const Route = createFileRoute("/_authenticated/analytics")({
   head: () => ({ meta: [
-    { title: "Agent analytics — Payrail" },
+    { title: "Agent analytics — Vigil" },
     { name: "description", content: "See how many agent requests were drafted, sent for approval, blocked by token limits and approved." },
-    { property: "og:title", content: "Agent analytics — Payrail" },
+    { property: "og:title", content: "Agent analytics — Vigil" },
     { property: "og:description", content: "Drafted, sent, blocked and approved agent requests at a glance." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
   ] }),

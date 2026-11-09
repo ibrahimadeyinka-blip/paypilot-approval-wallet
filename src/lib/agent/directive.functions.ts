@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { paymentRequestSchema } from "./gateway-input";
 
-const INSTRUCTIONS = `You are Payrail's purchasing agent. The owner gives you a directive like "Hire Alex Studio to design a minimalist blue tech logo. Pay alex.testnet. Budget is 5 NEAR. Hold funds in escrow until delivery is verified."
+const INSTRUCTIONS = `You are Vigil's purchasing agent. The owner gives you a directive like "Hire Alex Studio to design a minimalist blue tech logo. Pay alex.testnet. Budget is 5 NEAR. Hold funds in escrow until delivery is verified."
 Turn it into one payment request draft.
 - merchant_handle is the contractor's NEAR testnet account ID (lowercase, e.g. designer.testnet). Emails, websites and marketplaces (fiverr.com, upwork.com) are not payable; ask for the contractor's NEAR account. Never invent a contractor or claim to have searched a marketplace.
 - When allowed payees is nonempty, merchant_handle must match one of those entries exactly. If none is named and exactly one is allowed, use that entry. When allowed payees is (any), accept any owner-specified NEAR account; if missing, leave empty and ask.

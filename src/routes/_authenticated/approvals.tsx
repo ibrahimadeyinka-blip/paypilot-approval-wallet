@@ -19,9 +19,9 @@ export const Route = createFileRoute("/_authenticated/approvals")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { title: "Approvals — Payrail" },
+      { title: "Approvals — Vigil" },
       { name: "description", content: "Review what your agents want to pay for, with their quoted evidence, before any funds are held." },
-      { property: "og:title", content: "Approvals — Payrail" },
+      { property: "og:title", content: "Approvals — Vigil" },
       { property: "og:description", content: "Review agent payment requests and lock NEAR testnet escrow." },
     ],
   }),
@@ -178,7 +178,7 @@ function RequestCard({ r }: { r: Req }) {
         {r.status === "authorizing" && (
           <Notice tone="info" title="Escrow lock in progress">
             {r.paypal_approve_url
-              ? "Payrail is confirming the escrow balance on NEAR testnet. Checking again is always safe."
+              ? "Vigil is confirming the escrow balance on NEAR testnet. Checking again is always safe."
               : "The escrow lock hasn't started yet. Press Approve again — it won't create a second payment."}
           </Notice>
         )}

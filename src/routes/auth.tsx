@@ -16,9 +16,9 @@ export const Route = createFileRoute("/auth")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { title: "Sign in — Payrail" },
+      { title: "Sign in — Vigil" },
       { name: "description", content: "Sign in to manage your agent tokens and payment approvals." },
-      { property: "og:title", content: "Sign in — Payrail" },
+      { property: "og:title", content: "Sign in — Vigil" },
       { property: "og:description", content: "Sign in to manage your agent tokens and payment approvals." },
     ],
   }),
@@ -71,7 +71,7 @@ function AuthPage() {
   return (
     <PublicFrame>
       <form onSubmit={submit} className="space-y-6">
-        <div className="pb-3"><span className="eyebrow">YOUR PAYMENT COMMAND CENTER</span><h1 className="mt-5 text-[32px] font-semibold leading-tight">{mode === "signin" ? "Welcome back." : mode === "signup" ? "Make it your own." : "A fresh start."}</h1><p className="mt-3 text-sm leading-relaxed text-muted-foreground">{mode === "signin" ? "Sign in to your Payrail account." : mode === "signup" ? "Create your Payrail account." : "Get a link to reset your password."}</p></div>
+        <div className="pb-3"><span className="eyebrow">YOUR PAYMENT COMMAND CENTER</span><h1 className="mt-5 text-[32px] font-semibold leading-tight">{mode === "signin" ? "Welcome back." : mode === "signup" ? "Make it your own." : "A fresh start."}</h1><p className="mt-3 text-sm leading-relaxed text-muted-foreground">{mode === "signin" ? "Sign in to your Vigil account." : mode === "signup" ? "Create your Vigil account." : "Get a link to reset your password."}</p></div>
         {mode === "reset" && (
           <p className="text-sm text-muted-foreground">
             Moved over from the old app? Enter your email and we'll send a link to choose a new password.

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 type AuthorizationDetails = { client?: { name?: string }; redirect_uri?: string; scope?: string; scopes?: string[]; redirect_url?: string; redirect_to?: string };
 export const Route = createFileRoute("/.lovable/oauth/consent")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Connect your account — Payrail" }, { name: "description", content: "Review and approve an external assistant's access to your Payrail account." }, { property: "og:title", content: "Connect your account — Payrail" }, { property: "og:description", content: "Secure account connection consent." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Connect your account — Vigil" }, { name: "description", content: "Review and approve an external assistant's access to your Vigil account." }, { property: "og:title", content: "Connect your account — Vigil" }, { property: "og:description", content: "Secure account connection consent." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   validateSearch: (s: Record<string, unknown>) => ({ authorization_id: typeof s["authorization_id"] === "string" ? s["authorization_id"] : "" }),
   beforeLoad: async ({ search, location }) => {
     if (!search.authorization_id) throw new Error("This connection link is missing its authorization request.");
@@ -50,7 +50,7 @@ function Consent() {
     }
   }
   const scopes = details.scopes ?? (details.scope ?? "").split(" ").filter(Boolean);
-  return <PublicFrame><main className="space-y-6"><span className="eyebrow">SECURE ACCOUNT CONNECTION</span><h1 className="text-2xl font-bold">Connect {client} to Payrail</h1><p className="break-all text-sm text-muted-foreground">{accountEmail}</p>
+  return <PublicFrame><main className="space-y-6"><span className="eyebrow">SECURE ACCOUNT CONNECTION</span><h1 className="text-2xl font-bold">Connect {client} to Vigil</h1><p className="break-all text-sm text-muted-foreground">{accountEmail}</p>
     <p>This lets {client} use this app as you.</p>
     <dl className="space-y-3 border-y py-4 text-sm"><div><dt className="text-muted-foreground">Client</dt><dd>{client}</dd></div>{details.redirect_uri && <div><dt className="text-muted-foreground">Return address</dt><dd className="break-all">{details.redirect_uri}</dd></div>}</dl>
     <ul className="space-y-2 text-sm"><li>Read your payment requests and history.</li><li>No approval, capture, or hold-release tools.</li>{scopes.map(scope => <li key={scope}>{({ openid: "Identify your account", email: "Share your email address", profile: "Share your basic profile" } as Record<string, string>)[scope] ?? `Additional permission requested: ${scope}`}</li>)}</ul>
