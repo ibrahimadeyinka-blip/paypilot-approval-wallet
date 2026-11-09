@@ -5,8 +5,8 @@
 - [x] Verify blank-payee approval guardrails and submission definition against the remixed database ($10 allowed, $10.01 blocked, unlisted restricted payee blocked)
 - [x] Add signed-in setup checklist with PayPal, applied schema and AI-assisted configuration checks (live AI explanation passed)
 - [ ] Verify signed-in automatic submission and setup checklist end to end (remix has no auth users; owner must sign up)
-- [ ] Update remixed PayPal Client ID and Client Secret (secure form was cancelled; waiting for new values)
-- [x] Clear copied remix migrations and verify an empty PostgreSQL migration scaffold without deleting app data
+- [ ] Update remixed PayPal Client ID and Client Secret (November 9 secure update form was cancelled; both values remain unchanged)
+- [x] Clear copied remix migrations and verify an empty PostgreSQL migration scaffold without deleting app data (November 9: empty journal and blank schema retained; copied SQL and snapshots absent)
 - [ ] Make allowed payees optional and contractor-focused
 - [ ] Upgrade Agent Chat to a conversational chat room with guarded draft cards
 - [ ] Replace Connect your agent with a live safety cockpit and verify wallet/chat flows
