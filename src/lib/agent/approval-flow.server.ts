@@ -52,9 +52,9 @@ const RETRY_SAFE = "Try again — it's safe and won't create a second payment.";
 
 function paypalMessage(err: unknown): string {
   if (err instanceof PaypalError) {
-    return err.kind === "config" ? err.message : `PayPal: ${err.message}${err.debugId ? ` (ref ${err.debugId})` : ""}`;
+    return err.kind === "config" ? err.message : `NEAR: ${err.message}${err.debugId ? ` (ref ${err.debugId})` : ""}`;
   }
-  return "Unexpected error while contacting PayPal.";
+  return "Unexpected error while contacting NEAR testnet.";
 }
 
 export async function runApprove(
@@ -77,7 +77,7 @@ export async function runApprove(
       return { status: r.status ?? "unknown", message: "This request was already decided." };
     case "in_progress":
       if (r.approve_url) {
-        return { status: "authorizing", approveUrl: r.approve_url, message: "Finish approving the payment at PayPal." };
+        return { status: "authorizing", approveUrl: r.approve_url, message: "Finish confirming the escrow lock." };
       }
       break; // order not created yet (earlier attempt timed out): retry with the same attempt key
     case "proceed":
@@ -93,14 +93,14 @@ export async function runApprove(
       requestKey: `${input.requestId}:${attempt}:create`,
       referenceId: input.requestId,
       amountCents: r.amount_cents ?? 0,
-      currency: r.currency ?? "USD",
+      currency: r.currency ?? "NEAR",
       description: `${r.vendor_name ?? ""}: ${r.description ?? ""}`,
       returnUrl: input.returnUrl,
       cancelUrl: input.cancelUrl,
     });
   } catch (err) {
     if (isTransient(err)) {
-      return { status: "authorizing", message: `PayPal didn't answer in time. ${RETRY_SAFE}` };
+      return { status: "authorizing", message: `NEAR testnet didn't answer in time. ${RETRY_SAFE}` };
     }
     const message = paypalMessage(err);
     await deps.rpc("fail_agent_authorization", { p_request_id: input.requestId, p_attempt: attempt, p_error: message });
@@ -114,9 +114,9 @@ export async function runApprove(
     p_approve_url: order.approveUrl,
   })) as boolean;
   if (!attached) {
-    return { status: "changed", message: "This request changed while we contacted PayPal. Refresh to see its status." };
+    return { status: "changed", message: "This request changed while we contacted NEAR testnet. Refresh to see its status." };
   }
-  return { status: "authorizing", approveUrl: order.approveUrl, message: "Finish approving the payment at PayPal." };
+  return { status: "authorizing", approveUrl: order.approveUrl, message: "Finish confirming the escrow lock." };
 }
 
 type ConfirmTarget = { requestId: string; ownerId: string } | { orderId: string };
@@ -132,13 +132,13 @@ async function check(deps: FlowDeps, target: ConfirmTarget): Promise<DbResult> {
 function mapNonProceed(c: DbResult): FlowResult | null {
   switch (c.outcome) {
     case "not_found":
-      return { status: "not_found", message: "We couldn't find a payment request for this PayPal order." };
+      return { status: "not_found", message: "We couldn't find a payment request for this NEAR testnet order." };
     case "already_authorized":
-      return { status: "authorized", message: "Funds are on hold with PayPal Sandbox." };
+      return { status: "authorized", message: "NEAR is locked in the testnet escrow." };
     case "not_actionable":
-      return { status: c.status ?? "unknown", message: c.reason ?? "This request is no longer waiting for PayPal." };
+      return { status: c.status ?? "unknown", message: c.reason ?? "This request is no longer waiting for NEAR testnet." };
     case "no_order":
-      return { status: "authorizing", message: `PayPal hasn't been reached yet. Press Approve again. ${RETRY_SAFE}` };
+      return { status: "authorizing", message: `NEAR testnet hasn't been reached yet. Press Approve again. ${RETRY_SAFE}` };
     case "blocked":
       return { status: "blocked", message: c.reason ?? "A safeguard stopped this payment before funds were held." };
     case "proceed":
@@ -169,25 +169,25 @@ export async function runConfirm(deps: FlowDeps, target: ConfirmTarget): Promise
   } catch (err) {
     const issue = err instanceof PaypalError ? err.issue : undefined;
     if (issue === "ORDER_NOT_APPROVED" || issue === "PAYER_ACTION_REQUIRED") {
-      return { status: "authorizing", message: "Waiting for you to approve the payment at PayPal." };
+      return { status: "authorizing", message: "Waiting for you to confirm the escrow lock." };
     }
     if (isTransient(err)) {
-      return { status: "authorizing", message: `We couldn't confirm with PayPal yet. ${RETRY_SAFE}` };
+      return { status: "authorizing", message: `We couldn't confirm with NEAR testnet yet. ${RETRY_SAFE}` };
     }
     if (issue !== "ORDER_ALREADY_AUTHORIZED") return fail(paypalMessage(err));
     try {
       auth = await deps.paypal.getOrderAuthorization(orderId);
     } catch (lookupErr) {
       if (isTransient(lookupErr)) {
-        return { status: "authorizing", message: `We couldn't confirm with PayPal yet. ${RETRY_SAFE}` };
+        return { status: "authorizing", message: `We couldn't confirm with NEAR testnet yet. ${RETRY_SAFE}` };
       }
       return fail(paypalMessage(lookupErr));
     }
-    if (!auth) return { status: "authorizing", message: `PayPal hasn't finished placing the hold. ${RETRY_SAFE}` };
+    if (!auth) return { status: "authorizing", message: `NEAR testnet hasn't finished placing the hold. ${RETRY_SAFE}` };
   }
 
   if (BAD_AUTH_STATUSES.has(auth.status)) {
-    return fail(`PayPal returned the authorization as ${auth.status.toLowerCase()}. No funds are held.`);
+    return fail(`NEAR testnet returned the authorization as ${auth.status.toLowerCase()}. No funds are held.`);
   }
 
   const rec = (await deps.rpc("record_agent_authorization", {
@@ -200,25 +200,25 @@ export async function runConfirm(deps: FlowDeps, target: ConfirmTarget): Promise
   })) as DbResult;
 
   if (rec.outcome === "conflict") {
-    // The owner declined (or the request changed) while PayPal was placing the hold: release it.
+    // The owner declined (or the request changed) while NEAR testnet was placing the hold: release it.
     try {
       await deps.paypal.voidAuthorization(auth.authorizationId, `${requestId}:${attempt}:void`);
-      return { status: rec.status ?? "declined", message: "The request changed while PayPal placed the hold, so the hold was released." };
+      return { status: rec.status ?? "declined", message: "The request changed while NEAR testnet placed the hold, so the hold was released." };
     } catch {
       return {
         status: rec.status ?? "declined",
-        message: `The request changed while PayPal placed the hold and we couldn't release it automatically (authorization ${auth.authorizationId}). It will expire on its own, or you can void it in PayPal.`,
+        message: `The request changed while NEAR testnet placed the hold and we couldn't release it automatically (authorization ${auth.authorizationId}). It will expire on its own, or you can void it in NEAR testnet.`,
       };
     }
   }
-  return { status: "authorized", message: "Funds are on hold with PayPal Sandbox. Nothing is captured yet." };
+  return { status: "authorized", message: "NEAR is locked in the testnet escrow. Nothing is captured yet." };
 }
 
 export async function runCancel(deps: FlowDeps, orderId: string): Promise<FlowResult> {
   const c = await check(deps, { orderId });
   const early = mapNonProceed(c);
   if (early) return early;
-  const message = "You cancelled at PayPal. No funds were held.";
+  const message = "You cancelled the escrow lock. No funds were held.";
   await deps.rpc("fail_agent_authorization", { p_request_id: c.request_id, p_attempt: c.attempt, p_error: message });
   return { status: "authorization_failed", message };
 }
