@@ -30,7 +30,7 @@ export function LedgerView({ mode }: { mode: "history" | "ledger" }) {
     execute: () => runWebMCPTool("read_payment_history", () => visible.length ? visible.map(r => `${r.id}: ${r.vendor_name}, ${money(r.amount_cents, r.currency)}, ${statusMeta(r.status).label}`).join("\n") : "No payments in the current view."),
   });
   function exportRows() {
-    const header = ["Request ID", "Created", "Merchant", "Amount cents", "Currency", "Status", "PayPal order", "Authorization", "Capture", "Capture status"];
+    const header = ["Request ID", "Created", "Merchant", "Amount cents", "Currency", "Status", "Escrow order", "Escrow hold", "NEAR transaction", "Release status"];
     const lines = visible.map(r => [r.id, r.created_at, r.vendor_name, r.amount_cents, r.currency, r.status, r.paypal_order_id, r.paypal_authorization_id, r.paypal_capture_id, r.paypal_capture_status]);
     const url = URL.createObjectURL(new Blob(["\uFEFF" + [header, ...lines].map(row => row.map(csvCell).join(",")).join("\r\n")], { type: "text/csv;charset=utf-8" }));
     const a = document.createElement("a"); a.href = url; a.download = "payrail-ledger.csv"; a.click(); URL.revokeObjectURL(url);
@@ -46,7 +46,7 @@ export function LedgerView({ mode }: { mode: "history" | "ledger" }) {
       <Button variant="outline" size="sm" onClick={exportRows} disabled={!visible.length}><Download className="size-4" />Export CSV</Button>
     </div>
     {mode === "ledger" && <div className="grid grid-cols-2 gap-5 border-y bg-card px-5 py-7 sm:grid-cols-4">
-      {[ ["On hold", totals.held], ["Confirmed payments", totals.paid], ["Holds released", totals.released], ["Capture unconfirmed", totals.unconfirmed] ].map(([label, amount]) => <div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 font-display text-2xl font-semibold tabular-nums">{money(Number(amount))}</p></div>)}
+      {[ ["On hold", totals.held], ["Confirmed payments", totals.paid], ["Holds released", totals.released], ["Release unconfirmed", totals.unconfirmed] ].map(([label, amount]) => <div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 font-display text-2xl font-semibold tabular-nums">{money(Number(amount))}</p></div>)}
     </div>}
     <div className="flex flex-wrap items-center gap-3">
       <div className="relative min-w-0 flex-1"><Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" /><Input className="pl-9" aria-label="Search payments" placeholder="Search merchant or request" value={search} onChange={e => setSearch(e.target.value)} /></div>
@@ -55,12 +55,12 @@ export function LedgerView({ mode }: { mode: "history" | "ledger" }) {
       </select>
       {(search || status !== "all") && <Button variant="ghost" size="icon" aria-label="Clear filters" onClick={() => { setSearch(""); setStatus("all"); }}><X className="size-4" /></Button>}
     </div>
-    <div className="flex justify-between text-xs text-muted-foreground"><span>{visible.length} payments</span>{rows.length === 500 && <span>Latest 500 requests</span>}<Badge variant="outline">PayPal Sandbox</Badge></div>
+    <div className="flex justify-between text-xs text-muted-foreground"><span>{visible.length} payments</span>{rows.length === 500 && <span>Latest 500 requests</span>}<Badge variant="outline">NEAR Testnet</Badge></div>
     {!rows.length ? <div className="empty-state min-h-64"><Icon className="mx-auto mb-3 size-8" /><p>No payment requests yet.</p></div> : <Suspense fallback={<div className="empty-state min-h-64">Loading payment records…</div>}><PaymentGrid rows={filtered} onOpen={setSelectedId} onVisibleIds={ids => setGridIds(previous => previous?.join(",") === ids.join(",") ? previous : ids)} /></Suspense>}
     <Dialog open={Boolean(selected)} onOpenChange={open => { if (!open) setSelectedId(null); }}><DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-5xl"><DialogHeader><DialogTitle>{selected?.vendor_name} — payment history</DialogTitle></DialogHeader>
       {selected && <><div className="flex items-center gap-3"><span className="font-mono text-xl">{money(selected.amount_cents, selected.currency)}</span><Badge variant={statusMeta(selected.status).tone}>{statusMeta(selected.status).label}</Badge></div>
         <p className="break-words text-sm">{selected.description}</p>
-        <dl className="grid gap-2 border-y py-3 text-xs">{[["Request", selected.id], ["PayPal order", selected.paypal_order_id], ["Authorization", selected.paypal_authorization_id], ["Capture", selected.paypal_capture_id], ["Capture status", selected.paypal_capture_status]].filter(([, v]) => v).map(([k, v]) => <div key={k} className="grid grid-cols-[8rem_1fr] gap-2"><dt className="text-muted-foreground">{k}</dt><dd className="break-all font-mono">{v}</dd></div>)}</dl>
+        <dl className="grid gap-2 border-y py-3 text-xs">{[["Request", selected.id], ["Escrow order", selected.paypal_order_id], ["Escrow hold", selected.paypal_authorization_id], ["NEAR transaction", selected.paypal_capture_id], ["Capture status", selected.paypal_capture_status]].filter(([, v]) => v).map(([k, v]) => <div key={k} className="grid grid-cols-[8rem_1fr] gap-2"><dt className="text-muted-foreground">{k}</dt><dd className="break-all font-mono">{v}</dd></div>)}</dl>
         <div><p className="mb-2 text-xs font-medium text-muted-foreground">Agent-provided source</p><blockquote className="break-words border-l-2 pl-3 text-sm">{selected.source_context}</blockquote></div>
         <Suspense fallback={<div className="empty-state">Loading audit timeline…</div>}><AuditGrid rows={timeline} /></Suspense>
       </>}

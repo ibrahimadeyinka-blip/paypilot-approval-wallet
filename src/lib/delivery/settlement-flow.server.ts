@@ -39,9 +39,9 @@ const FAILED_CAPTURE_STATUSES = new Set(["DECLINED", "FAILED"]);
 
 function describe(err: unknown): string {
   if (err instanceof PaypalError) {
-    return err.kind === "config" ? err.message : `PayPal: ${err.message}${err.debugId ? ` (ref ${err.debugId})` : ""}`;
+    return err.kind === "config" ? err.message : `NEAR: ${err.message}${err.debugId ? ` (ref ${err.debugId})` : ""}`;
   }
-  return "Unexpected error while contacting PayPal.";
+  return "Unexpected error while contacting NEAR testnet.";
 }
 
 export async function runCapture(
@@ -62,7 +62,7 @@ export async function runCapture(
     case "not_allowed":
       return { status: "held", message: b.reason ?? "Payment stays on hold." };
     case "expired":
-      return { status: "capture_failed", message: b.reason ?? "The PayPal authorization expired. No funds were taken." };
+      return { status: "capture_failed", message: b.reason ?? "The escrow hold expired. No funds were taken." };
     case "proceed":
       break;
     default:
@@ -78,7 +78,7 @@ export async function runCapture(
       p_capture_id: captureId,
       p_capture_status: status,
     });
-    return { status: "captured", message: "Payment released through PayPal Sandbox." };
+    return { status: "captured", message: "Payment released on-chain on NEAR testnet." };
   };
   const fail = async (message: string, terminal: boolean): Promise<SettlementResult> => {
     await deps.rpc("fail_agent_capture", { p_request_id: input.requestId, p_attempt: attempt, p_error: message, p_terminal: terminal });
@@ -92,13 +92,13 @@ export async function runCapture(
     const issue = err instanceof PaypalError ? err.issue : undefined;
     if (issue === "AUTHORIZATION_ALREADY_CAPTURED") return record(null, "ALREADY_CAPTURED");
     if (isTransient(err)) {
-      return { status: "capturing", message: "PayPal didn't confirm the capture yet. Try again — it won't charge twice." };
+      return { status: "capturing", message: "NEAR testnet didn't confirm the capture yet. Try again — it won't charge twice." };
     }
     if (issue && TERMINAL_CAPTURE_ISSUES.has(issue)) return fail(`${describe(err)} No funds were taken.`, true);
     return fail(`${describe(err)} The money is still on hold.`, false);
   }
   if (FAILED_CAPTURE_STATUSES.has(cap.status)) {
-    return fail(`PayPal reported the capture as ${cap.status.toLowerCase()}. The money is still on hold.`, false);
+    return fail(`NEAR testnet reported the capture as ${cap.status.toLowerCase()}. The money is still on hold.`, false);
   }
   return record(cap.captureId, cap.status);
 }
@@ -127,10 +127,10 @@ export async function runVoid(deps: SettlementDeps, input: { requestId: string; 
   } catch (err) {
     const issue = err instanceof PaypalError ? err.issue : undefined;
     if (issue && NO_HOLD_LEFT_ISSUES.has(issue)) {
-      return record("PayPal reported no active hold remained (already voided or expired). No funds were taken.");
+      return record("NEAR testnet reported no active hold remained (already voided or expired). No funds were taken.");
     }
     if (isTransient(err)) {
-      return { status: "voiding", message: "PayPal didn't confirm yet. Try again — it's safe to repeat." };
+      return { status: "voiding", message: "NEAR testnet didn't confirm yet. Try again — it's safe to repeat." };
     }
     const message = `${describe(err)} The money is still on hold.`;
     await deps.rpc("fail_agent_void", { p_request_id: input.requestId, p_attempt: attempt, p_error: message });

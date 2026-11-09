@@ -13,23 +13,23 @@ const searchSchema = z.object({
   cancelled: z.union([z.string(), z.number()]).optional(),
 });
 
-export const Route = createFileRoute("/paypal/return")({
+export const Route = createFileRoute("/escrow/confirm")({
   validateSearch: (s) => searchSchema.parse(s),
   head: () => ({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { title: "Confirming your PayPal hold — Payrail" },
-      { name: "description", content: "Payrail is confirming the PayPal Sandbox authorization hold you approved." },
-      { property: "og:title", content: "Confirming your PayPal hold — Payrail" },
-      { property: "og:description", content: "Confirming a PayPal Sandbox authorization hold." },
+      { title: "Confirming your NEAR escrow lock — Payrail" },
+      { name: "description", content: "Payrail is confirming the NEAR testnet escrow lock you approved." },
+      { property: "og:title", content: "Confirming your NEAR escrow lock — Payrail" },
+      { property: "og:description", content: "Confirming a NEAR testnet escrow lock." },
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: PaypalReturn,
+  component: EscrowConfirm,
 });
 
-function PaypalReturn() {
+function EscrowConfirm() {
   const { token, cancelled } = Route.useSearch();
   const complete = useServerFn(completePaypalReturn);
   const started = useRef(false);
@@ -39,12 +39,12 @@ function PaypalReturn() {
     if (started.current) return;
     started.current = true;
     if (!token) {
-      setResult({ status: "not_found", message: "PayPal didn't send back an order reference." });
+      setResult({ status: "not_found", message: "This link is missing its escrow reference." });
       return;
     }
     complete({ data: { orderId: token, cancelled: cancelled !== undefined } })
       .then((r) => { if (r.status === "authorized") track("project.agent_request_approved", {}); setResult(r); })
-      .catch(() => setResult({ status: "error", message: "We couldn't confirm with PayPal. Go back to Approvals and press \"check now\"." }));
+      .catch(() => setResult({ status: "error", message: "We couldn't confirm the escrow on NEAR testnet. Go back to Approvals and press \"check now\"." }));
   }, [token, cancelled, complete]);
 
   const ok = result?.status === "authorized";
@@ -63,7 +63,7 @@ function PaypalReturn() {
           )}
         </div>
         <h1 className="text-2xl font-semibold">
-          {waiting ? "Confirming with PayPal…" : ok ? "Funds are on hold" : "No hold placed"}
+          {waiting ? "Confirming on NEAR testnet…" : ok ? "NEAR locked in escrow" : "No hold placed"}
         </h1>
         <p className="text-sm text-muted-foreground">{result?.message ?? "This takes a few seconds."}</p>
         {!waiting && (

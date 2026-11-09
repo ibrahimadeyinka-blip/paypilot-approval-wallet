@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 /** Limits enforced by the database function; mirrored here for docs and the UI. */
-export const SINGLE_PAYMENT_CAP_CENTS = 10_000; // $100
-export const DAILY_BUDGET_CENTS = 50_000; // $500 rolling 24h
+export const SINGLE_PAYMENT_CAP_CENTS = 10_000; // 100 NEAR
+export const DAILY_BUDGET_CENTS = 50_000; // 500 NEAR rolling 24h
 export const TOKEN_PREFIX = "apt_";
 
 export const paymentRequestSchema = z.object({
@@ -12,9 +12,10 @@ export const paymentRequestSchema = z.object({
   currency: z
     .string()
     .trim()
-    .length(3)
+    .min(3)
+    .max(4)
     .transform((s) => s.toUpperCase())
-    .default("USD"),
+    .default("NEAR"),
   description: z.string().trim().min(1).max(2000),
   source_context: z.string().trim().min(10, "source_context must quote the text that justifies the payment").max(2000),
 });

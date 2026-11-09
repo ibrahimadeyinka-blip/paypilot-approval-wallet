@@ -23,7 +23,7 @@ import { Route as AuthenticatedLedgerRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated/setup'
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 import { Route as DeliverTokenRouteImport } from './routes/deliver.$token'
-import { Route as PaypalReturnRouteImport } from './routes/paypal.return'
+import { Route as EscrowConfirmRouteImport } from './routes/escrow.confirm'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicAgentGatewayRouteImport } from './routes/api/public/agent-gateway'
 import { Route as ApiPublicDeliverRouteImport } from './routes/api/public/deliver'
@@ -98,9 +98,9 @@ const DeliverTokenRoute = DeliverTokenRouteImport.update({
   path: '/deliver/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PaypalReturnRoute = PaypalReturnRouteImport.update({
-  id: '/paypal/return',
-  path: '/paypal/return',
+const EscrowConfirmRoute = EscrowConfirmRouteImport.update({
+  id: '/escrow/confirm',
+  path: '/escrow/confirm',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
@@ -133,7 +133,7 @@ export interface FileRoutesByFullPath {
   '/setup': typeof AuthenticatedSetupRoute
   '/wallet': typeof AuthenticatedWalletRoute
   '/deliver/$token': typeof DeliverTokenRoute
-  '/paypal/return': typeof PaypalReturnRoute
+  '/escrow/confirm': typeof EscrowConfirmRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/agent-gateway': typeof ApiPublicAgentGatewayRoute
   '/api/public/deliver': typeof ApiPublicDeliverRoute
@@ -152,7 +152,7 @@ export interface FileRoutesByTo {
   '/setup': typeof AuthenticatedSetupRoute
   '/wallet': typeof AuthenticatedWalletRoute
   '/deliver/$token': typeof DeliverTokenRoute
-  '/paypal/return': typeof PaypalReturnRoute
+  '/escrow/confirm': typeof EscrowConfirmRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/agent-gateway': typeof ApiPublicAgentGatewayRoute
   '/api/public/deliver': typeof ApiPublicDeliverRoute
@@ -173,7 +173,7 @@ export interface FileRoutesById {
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/deliver/$token': typeof DeliverTokenRoute
-  '/paypal/return': typeof PaypalReturnRoute
+  '/escrow/confirm': typeof EscrowConfirmRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/agent-gateway': typeof ApiPublicAgentGatewayRoute
   '/api/public/deliver': typeof ApiPublicDeliverRoute
@@ -194,7 +194,7 @@ export interface FileRouteTypes {
     | '/setup'
     | '/wallet'
     | '/deliver/$token'
-    | '/paypal/return'
+    | '/escrow/confirm'
     | '/.lovable/oauth/consent'
     | '/api/public/agent-gateway'
     | '/api/public/deliver'
@@ -213,7 +213,7 @@ export interface FileRouteTypes {
     | '/setup'
     | '/wallet'
     | '/deliver/$token'
-    | '/paypal/return'
+    | '/escrow/confirm'
     | '/.lovable/oauth/consent'
     | '/api/public/agent-gateway'
     | '/api/public/deliver'
@@ -233,7 +233,7 @@ export interface FileRouteTypes {
     | '/_authenticated/setup'
     | '/_authenticated/wallet'
     | '/deliver/$token'
-    | '/paypal/return'
+    | '/escrow/confirm'
     | '/.lovable/oauth/consent'
     | '/api/public/agent-gateway'
     | '/api/public/deliver'
@@ -247,7 +247,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DeliverTokenRoute: typeof DeliverTokenRoute
-  PaypalReturnRoute: typeof PaypalReturnRoute
+  EscrowConfirmRoute: typeof EscrowConfirmRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicAgentGatewayRoute: typeof ApiPublicAgentGatewayRoute
   ApiPublicDeliverRoute: typeof ApiPublicDeliverRoute
@@ -353,11 +353,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeliverTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/paypal/return': {
-      id: '/paypal/return'
-      path: '/paypal/return'
-      fullPath: '/paypal/return'
-      preLoaderRoute: typeof PaypalReturnRouteImport
+    '/escrow/confirm': {
+      id: '/escrow/confirm'
+      path: '/escrow/confirm'
+      fullPath: '/escrow/confirm'
+      preLoaderRoute: typeof EscrowConfirmRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.lovable/oauth/consent': {
@@ -416,7 +416,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DeliverTokenRoute: DeliverTokenRoute,
-  PaypalReturnRoute: PaypalReturnRoute,
+  EscrowConfirmRoute: EscrowConfirmRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicAgentGatewayRoute: ApiPublicAgentGatewayRoute,
   ApiPublicDeliverRoute: ApiPublicDeliverRoute,

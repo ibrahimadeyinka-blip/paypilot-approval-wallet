@@ -4,9 +4,9 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 /** Loads server-only modules inside handlers so they never reach the browser bundle. */
 async function loadFlow() {
-  const [{ supabaseAdmin }, { sandboxPaypal }, flow] = await Promise.all([
+  const [{ supabaseAdmin }, { nearEscrow }, flow] = await Promise.all([
     import("@/integrations/supabase/client.server"),
-    import("@/lib/paypal/client.server"),
+    import("@/lib/near/client.server"),
     import("./approval-flow.server"),
   ]);
   const callRpc = supabaseAdmin.rpc.bind(supabaseAdmin) as unknown as (
@@ -18,7 +18,7 @@ async function loadFlow() {
     if (error) throw new Error(`${fn}: ${error.message}`);
     return data;
   };
-  return { flow, deps: { rpc, paypal: sandboxPaypal } };
+  return { flow, deps: { rpc, paypal: nearEscrow } };
 }
 
 const originSchema = z
@@ -36,8 +36,8 @@ export const approveAgentRequest = createServerFn({ method: "POST" })
     return flow.runApprove(deps, {
       ownerId: context.userId,
       requestId: data.requestId,
-      returnUrl: `${data.origin}/paypal/return`,
-      cancelUrl: `${data.origin}/paypal/return?cancelled=1`,
+      returnUrl: `${data.origin}/escrow/confirm`,
+      cancelUrl: `${data.origin}/escrow/confirm?cancelled=1`,
     });
   });
 

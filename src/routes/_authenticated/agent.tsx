@@ -29,11 +29,11 @@ export const Route = createFileRoute("/_authenticated/agent")({
 });
 
 type Msg = { role: "user" | "assistant"; content: string; time: string; draft?: DirectiveDraft | undefined; key?: string; activity?: string[] };
-const money = (c: number) => `$${(c / 100).toFixed(2)}`;
+const money = (c: number) => `${(c / 100).toFixed(2)} NEAR`;
 const timestamp = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 const STARTERS = [
-  { label: "A blue tech logo", text: "Commission a minimalist blue tech logo. Budget is $100. Deliver a transparent PNG and an SVG. Use a PayPal authorization hold until the work is verified." },
-  { label: "Three vector icons", text: "Hire a designer for three matching vector icons. Budget is $75. Deliver editable SVG files." },
+  { label: "A blue tech logo", text: "Commission a minimalist blue tech logo. Pay pixelstudio.testnet. Budget is 5 NEAR. Deliver a transparent PNG and an SVG. Hold the NEAR in escrow until the work is verified." },
+  { label: "Three vector icons", text: "Hire iconsmith.testnet for three matching vector icons. Budget is 3 NEAR. Deliver editable SVG files." },
 ];
 
 function AgentChat() {
@@ -135,7 +135,7 @@ function AgentChat() {
                   {m.draft && (
                     <div className="mt-3 overflow-hidden rounded-md border text-xs">
                       <div className="flex items-center gap-2 border-b bg-accent px-4 py-3 font-medium text-accent-foreground"><FileCheck2 className="size-4" />Proof-of-source proposal</div>
-                      <div className="p-4"><div className="mb-4 flex flex-wrap items-center justify-between gap-2"><span className="font-display text-2xl font-semibold">{money(m.draft.amount_cents)} <span className="text-xs font-normal text-muted-foreground">USD</span></span>{token && <span className={`flex items-center gap-1 text-[10px] ${m.draft.amount_cents <= token.single_cap_cents ? "text-accent-foreground" : "text-destructive"}`}><ShieldCheck className="size-3" />{m.draft.amount_cents <= token.single_cap_cents ? `Within ${money(token.single_cap_cents)} cap` : `Above ${money(token.single_cap_cents)} cap`}</span>}</div>
+                      <div className="p-4"><div className="mb-4 flex flex-wrap items-center justify-between gap-2"><span className="font-display text-2xl font-semibold">{money(m.draft.amount_cents)} </span>{token && <span className={`flex items-center gap-1 text-[10px] ${m.draft.amount_cents <= token.single_cap_cents ? "text-accent-foreground" : "text-destructive"}`}><ShieldCheck className="size-3" />{m.draft.amount_cents <= token.single_cap_cents ? `Within ${money(token.single_cap_cents)} cap` : `Above ${money(token.single_cap_cents)} cap`}</span>}</div>
                       <dl className="grid gap-y-1 [&_dd]:mb-3 [&_dd]:break-words [&_dt]:text-muted-foreground">
                         <dt>Contractor</dt><dd>{m.draft.vendor_name} <span className="font-mono">({m.draft.merchant_handle})</span></dd>
                         <dt>Scope of work</dt><dd>{m.draft.description}</dd>

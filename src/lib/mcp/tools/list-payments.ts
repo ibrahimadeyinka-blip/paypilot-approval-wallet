@@ -5,7 +5,7 @@ import { supabaseForUser } from "../supabase";
 export default defineTool({
   name: "list_payments",
   title: "List payments",
-  description: "List the connected account's latest agent payment requests and PayPal Sandbox references.",
+  description: "List the connected account's latest agent payment requests and NEAR testnet escrow references.",
   inputSchema: { limit: z.number().int().min(1).max(100).default(25), status: z.string().max(40).optional() },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ limit, status }, ctx) => {

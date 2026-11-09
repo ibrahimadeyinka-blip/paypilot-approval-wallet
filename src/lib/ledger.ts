@@ -13,7 +13,7 @@ export const ledgerQuery = queryOptions({
   refetchInterval: 15000,
 });
 
-export const money = (cents: number, currency = "USD") => new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
+export const money = (cents: number, _currency = "NEAR") => `${(cents / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} NEAR`;
 
 /** A hold is never counted as paid; pending PayPal captures remain unconfirmed. */
 export function ledgerTotals(rows: { amount_cents: number; status: string; paypal_capture_status: string | null }[]) {
