@@ -139,7 +139,7 @@ function Index() {
     <footer className="border-t">
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div><PayrailBrand /><p className="mt-4 max-w-xs text-sm text-muted-foreground">Guarded payments for AI agents. Owners approve every escrow lock on NEAR.</p></div>
-        {[["Owners", [["/wallet", "Agent wallet"], ["/approvals", "Approvals"]]], ["Agents", [["/agent", "Agent chat"], ["/analytics", "Analytics"]]], ["Records", [["/ledger", "Ledger"], ["/history", "History"]]]].map(([h, ls]) => <div key={h as string}><p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{h as string}</p>{(ls as string[][]).map(([to, l]) => <Link key={to} to={to} className="mt-3 block text-sm hover:text-highlight">{l}</Link>)}</div>)}
+        {[["Owners", [["/wallet", "Agent wallet"], ["/approvals", "Approvals"]]], ["Agents", [["/agent", "Agent chat"], ["/analytics", "Analytics"]]], ["Records", [["/ledger", "Ledger"], ["/history", "History"]]]].map(([h, ls]) => <div key={h as string}><p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{h as string}</p>{(ls as string[][]).map(([to, l]) => <Link key={to} to={to as "/wallet"} className="mt-3 block text-sm hover:text-highlight">{l}</Link>)}</div>)}
       </div>
       <div className="border-t"><div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-3 px-5 py-5 font-mono text-[11px] text-muted-foreground sm:px-8"><span>© Vigil · escrow rails for agents</span><span className="flex items-center gap-2"><span className="size-1.5 bg-signal" /> NEAR Testnet only · no mainnet funds</span></div></div>
     </footer>
