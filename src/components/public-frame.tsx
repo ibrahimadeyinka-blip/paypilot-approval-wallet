@@ -22,6 +22,6 @@ export function PublicFrame({ children }: { children: React.ReactNode }) {
       </section>
       <section className="flex items-center justify-center py-12 sm:px-8 lg:px-12"><div className="w-full max-w-sm animate-enter">{children}</div></section>
     </div>
-    <footer className="mx-auto flex max-w-6xl flex-wrap justify-between gap-3 px-5 py-6 font-mono text-[11px] text-muted-foreground sm:px-8"><span>payrail · agent payment rails</span><span className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-signal" /> PayPal Sandbox</span></footer>
+    <footer className="mx-auto flex max-w-6xl flex-wrap justify-between gap-3 px-5 py-6 font-mono text-[11px] text-muted-foreground sm:px-8"><span>payrail · agent payment rails</span><span className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-signal" /> NEAR Testnet</span></footer>
   </div>;
 }

@@ -2,7 +2,7 @@ export type BadgeTone = "default" | "secondary" | "destructive" | "outline";
 
 const STATUS: Record<string, { label: string; tone: BadgeTone }> = {
   pending_approval: { label: "Needs your approval", tone: "default" },
-  authorizing: { label: "Waiting for PayPal", tone: "secondary" },
+  authorizing: { label: "Locking escrow", tone: "secondary" },
   authorized: { label: "Funds on hold", tone: "default" },
   authorization_failed: { label: "Hold failed", tone: "destructive" },
   approved: { label: "Approved (old flow)", tone: "secondary" },
@@ -22,7 +22,7 @@ export function statusMeta(status: string): { label: string; tone: BadgeTone } {
 /** Requests that still need the owner to approve or decline. */
 export const NEEDS_ACTION = new Set(["pending_approval", "authorizing", "authorization_failed"]);
 
-/** Requests with money held at PayPal, waiting on delivery or settlement. */
+/** Requests with NEAR held in escrow, waiting on delivery or settlement. */
 export const ON_HOLD = new Set(["authorized", "capturing", "voiding"]);
 
 /** Statuses that show the delivery panel. */

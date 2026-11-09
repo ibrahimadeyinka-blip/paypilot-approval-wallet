@@ -88,8 +88,7 @@ function DeliverPage() {
                 </div>
                 {info.amountCents != null && (
                   <div className="font-mono text-xl font-semibold tabular-nums">
-                    {info.currency === "USD" ? "$" : `${info.currency} `}
-                    {(info.amountCents / 100).toFixed(2)}
+                    {(info.amountCents / 100).toFixed(2)} NEAR
                   </div>
                 )}
               </div>

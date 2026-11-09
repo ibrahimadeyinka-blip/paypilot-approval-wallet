@@ -1,3 +1,4 @@
+import { formatNear } from "@/lib/near/units";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
@@ -40,7 +41,7 @@ export const Route = createFileRoute("/_authenticated/wallet")({
   component: Wallet,
 });
 
-const usd = (c: number) => `$${(c / 100).toFixed(2)}`;
+const usd = (c: number) => formatNear(c);
 
 function Wallet() {
   const qc = useQueryClient();
@@ -96,7 +97,7 @@ function Wallet() {
   const activeTokens = tokens.filter((t) => !t.revoked && new Date(t.expires_at).getTime() > now);
   const stages = [
     { name: "Owner approval", icon: ShieldCheck, statuses: ["pending_approval"], description: "Every request starts with your decision." },
-    { name: "PayPal hold", icon: LockKeyhole, statuses: ["authorizing", "authorized"], description: "Authorized funds stay on hold, not paid out." },
+    { name: "NEAR escrow", icon: LockKeyhole, statuses: ["authorizing", "authorized"], description: "Authorized funds stay on hold, not paid out." },
     { name: "Delivery review", icon: ScanEye, statuses: ["capture_failed"], description: "Private delivery. AI checks the requirements." },
     { name: "Settlement", icon: CheckCircle2, statuses: ["captured", "voided"], description: "Verified work is paid; released holds aren't." },
   ];
@@ -150,12 +151,12 @@ function Wallet() {
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:col-span-2">
           <div className="space-y-1.5">
-            <Label htmlFor="single-cap">Max per payment (USD)</Label>
+            <Label htmlFor="single-cap">Max per payment (NEAR)</Label>
             <Input id="single-cap" inputMode="decimal" placeholder="150" value={singleCap} onChange={(e) => setSingleCap(e.target.value)} required />
             <p className="text-xs text-muted-foreground">Any single request above this is blocked.</p>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="daily-cap">Rolling 24h budget (USD)</Label>
+            <Label htmlFor="daily-cap">Rolling 24h budget (NEAR)</Label>
             <Input id="daily-cap" inputMode="decimal" placeholder="500" value={dailyCap} onChange={(e) => setDailyCap(e.target.value)} required />
             <p className="text-xs text-muted-foreground">Total this agent can have pending or held in any 24 hours.</p>
           </div>

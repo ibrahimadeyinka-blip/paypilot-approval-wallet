@@ -1,3 +1,4 @@
+import { txUrl } from "@/lib/near/units";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -128,14 +129,14 @@ export function DeliveryPanel({ r }: { r: DeliveryRequest }) {
           Paid {when(r.captured_at)} — {r.captured_by === "owner" ? "you accepted the work" : "the AI review approved the work"}.
           {r.paypal_capture_id && (
             <>
-              {" "}PayPal capture <span className="font-mono">{r.paypal_capture_id}</span>.
+              {" "}NEAR transaction{" "}<a className="font-mono underline" href={txUrl(r.paypal_capture_id)} target="_blank" rel="noopener noreferrer">{r.paypal_capture_id.slice(0, 10)}…</a>.
             </>
           )}
         </Callout>
       )}
       {r.status === "voided" && <Callout tone="muted">Hold released {when(r.voided_at)}. No funds were taken.</Callout>}
-      {r.status === "capturing" && <Callout tone="muted">Releasing payment with PayPal… If this doesn't finish, press "Check again".</Callout>}
-      {r.status === "voiding" && <Callout tone="muted">Releasing the hold with PayPal… If this doesn't finish, press "Retry".</Callout>}
+      {r.status === "capturing" && <Callout tone="muted">Sending NEAR on-chain to the contractor… If this doesn't finish, press "Check again".</Callout>}
+      {r.status === "voiding" && <Callout tone="muted">Releasing the escrow hold… If this doesn't finish, press "Retry".</Callout>}
       {r.settlement_error && r.status !== "captured" && r.status !== "voided" && (
         <Callout tone="destructive">{r.settlement_error}</Callout>
       )}
