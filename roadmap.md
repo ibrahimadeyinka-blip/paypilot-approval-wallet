@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Add three counted Approvals tabs and two counted Wallet tabs; 34 tests passed and signed-in desktop/mobile tabs matched real records without changing payment data
 - [x] Restore signup profile creation and repair missing existing profiles; reproduced token failure, then verified signed-in $10/$60 token issuance with blank payees and revoked the test token
 - [x] Add owner-started AI tool runs and opt-in automatic guarded submission (live policy/proposal tool calls passed)
 - [x] Verify blank-payee approval guardrails and submission definition against the remixed database ($10 allowed, $10.01 blocked, unlisted restricted payee blocked)

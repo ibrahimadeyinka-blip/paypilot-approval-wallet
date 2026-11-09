@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { tokenGroup } from "@/lib/agent/classification";
 import {
   agentRequestsQuery,
   agentTokensQuery,
@@ -52,6 +54,7 @@ function Wallet() {
   const [busy, setBusy] = useState(false);
   const [secret, setSecret] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [tokenTab, setTokenTab] = useState("active");
 
   async function issue(e: FormEvent) {
     e.preventDefault();
@@ -68,6 +71,7 @@ function Wallet() {
     try {
       const { secret } = await issueAgentToken(label.trim(), lifetime, list, single, daily);
       setSecret(secret);
+      setTokenTab("active");
       setLabel("");
       setMerchants("");
       qc.invalidateQueries({ queryKey: agentTokensQuery.queryKey });
@@ -163,14 +167,23 @@ function Wallet() {
 
       <section className="space-y-3">
         <h2 className="section-heading">Your tokens</h2>
-        {tokens.length === 0 && <p className="empty-state"><KeyRound className="size-6 text-primary" />No tokens yet.</p>}
-        <ul className={tokens.length ? "divide-y rounded-md border bg-card" : ""}>
-          {tokens.map((t) => {
+        <Tabs value={tokenTab} onValueChange={setTokenTab} className="space-y-4">
+          <TabsList aria-label="Token categories" className="grid h-auto w-full grid-cols-2 rounded-md sm:max-w-sm">
+            <TabsTrigger value="active" className="gap-2 py-2">Active <span className="font-mono text-xs tabular-nums">{activeTokens.length}</span></TabsTrigger>
+            <TabsTrigger value="revoked" className="gap-2 py-2">Revoked <span className="font-mono text-xs tabular-nums">{tokens.length - activeTokens.length}</span></TabsTrigger>
+          </TabsList>
+          {(["active", "revoked"] as const).map((group) => {
+            const matching = tokens.filter((t) => tokenGroup(t, now) === group);
+            return <TabsContent key={group} value={group} className="space-y-3">
+              {group === "revoked" && <h3 className="text-sm text-muted-foreground">Revoked & expired tokens</h3>}
+              {matching.length === 0 && <p className="empty-state"><KeyRound className="size-6 text-primary" />{group === "active" ? "No active tokens." : "No revoked or expired tokens."}</p>}
+              <ul className={matching.length ? "divide-y rounded-md border bg-card" : ""}>
+          {matching.map((t) => {
             const expired = new Date(t.expires_at).getTime() <= now;
             return (
               <li key={t.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2 font-medium">
+                  <div className="flex flex-wrap items-center gap-2 break-words font-medium">
                     {t.label}
                     {t.revoked ? <Badge variant="destructive">Revoked</Badge> : expired ? <Badge variant="secondary">Expired</Badge> : <Badge>Active</Badge>}
                   </div>
@@ -187,6 +200,9 @@ function Wallet() {
             );
           })}
         </ul>
+            </TabsContent>;
+          })}
+        </Tabs>
       </section>
 
       <section className="space-y-3">
