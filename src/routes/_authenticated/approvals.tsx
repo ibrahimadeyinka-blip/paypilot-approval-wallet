@@ -6,8 +6,10 @@ import { toast } from "sonner";
 import { AlertTriangle, ExternalLink, Quote, RefreshCw, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { approvalGroup } from "@/lib/agent/classification";
 import { approvalsQuery } from "@/lib/agent/tokens";
-import { HAS_DELIVERY, NEEDS_ACTION, ON_HOLD, statusMeta } from "@/lib/agent/status";
+import { HAS_DELIVERY, NEEDS_ACTION, statusMeta } from "@/lib/agent/status";
 import { DeliveryPanel } from "@/components/delivery-panel";
 import { approveAgentRequest, confirmAgentAuthorization, declineAgentRequest } from "@/lib/agent/approvals.functions";
 
@@ -36,9 +38,11 @@ const when = (s: string | null) => (s ? new Date(s).toLocaleString() : "—");
 
 function Approvals() {
   const requests = useApprovals();
-  const open = requests.filter((r) => NEEDS_ACTION.has(r.status));
-  const held = requests.filter((r) => ON_HOLD.has(r.status));
-  const done = requests.filter((r) => !NEEDS_ACTION.has(r.status) && !ON_HOLD.has(r.status));
+  const groups = [
+    { key: "new", label: "New", heading: "Awaiting approval", empty: "You’re all caught up." },
+    { key: "successful", label: "Successful", heading: "Funds on hold & paid requests", empty: "No successful requests yet." },
+    { key: "unsuccessful", label: "Unsuccessful", heading: "Blocked, declined, failed & released requests", empty: "No unsuccessful requests." },
+  ] as const;
 
   return (
     <main className="app-main space-y-9">
@@ -50,33 +54,25 @@ function Approvals() {
         </p>
       </div>
 
-      <section className="space-y-3">
-        <h2 className="section-heading">Needs your decision ({open.length})</h2>
-        {open.length === 0 && <div className="empty-state"><ShieldCheck className="size-6 text-primary" /><p>You’re all caught up.</p></div>}
-        {open.map((r) => (
-          <RequestCard key={r.id} r={r} />
-        ))}
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="section-heading">Funds on hold — waiting for delivery ({held.length})</h2>
-        <p className="text-sm text-muted-foreground">
-          Send the merchant a private upload link. Their file is reviewed by AI against your requirements; payment is
-          released only if it clearly matches. Anything unclear comes back to you.
-        </p>
-        {held.length === 0 && <div className="empty-state"><p>Nothing on hold.</p></div>}
-        {held.map((r) => (
-          <RequestCard key={r.id} r={r} />
-        ))}
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="section-heading">History</h2>
-        {done.length === 0 && <div className="empty-state"><p>No decided requests yet.</p></div>}
-        {done.map((r) => (
-          <RequestCard key={r.id} r={r} />
-        ))}
-      </section>
+      <Tabs defaultValue="new" className="space-y-6">
+        <TabsList aria-label="Approval categories" className="grid h-auto w-full grid-cols-3 rounded-md sm:max-w-lg">
+          {groups.map((group) => (
+            <TabsTrigger key={group.key} value={group.key} className="min-w-0 flex-wrap gap-1.5 px-1.5 py-2 text-xs sm:text-sm">
+              {group.label}<span className="font-mono text-xs tabular-nums">{requests.filter((r) => approvalGroup(r.status) === group.key).length}</span>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {groups.map((group) => {
+          const matching = requests.filter((r) => approvalGroup(r.status) === group.key);
+          return (
+            <TabsContent key={group.key} value={group.key} className="space-y-3">
+              <h2 className="section-heading">{group.heading} ({matching.length})</h2>
+              {matching.length === 0 && <div className="empty-state"><ShieldCheck className="size-6 text-primary" /><p>{group.empty}</p></div>}
+              {matching.map((r) => <RequestCard key={r.id} r={r} />)}
+            </TabsContent>
+          );
+        })}
+      </Tabs>
     </main>
   );
 }
