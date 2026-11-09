@@ -1,3 +1,4 @@
+import { formatNear, accountUrl } from "@/lib/near/units";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/approvals")({
       { title: "Approvals — Payrail" },
       { name: "description", content: "Review what your agents want to pay for, with their quoted evidence, before any funds are held." },
       { property: "og:title", content: "Approvals — Payrail" },
-      { property: "og:description", content: "Review agent payment requests and place PayPal Sandbox holds." },
+      { property: "og:description", content: "Review agent payment requests and lock NEAR testnet escrow." },
     ],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(approvalsQuery),
@@ -33,7 +34,7 @@ function useApprovals() {
   return useSuspenseQuery(approvalsQuery).data;
 }
 
-const usd = (c: number, cur: string) => `${cur === "USD" ? "$" : `${cur} `}${(c / 100).toFixed(2)}`;
+const usd = (c: number, _cur: string) => formatNear(c);
 const when = (s: string | null) => (s ? new Date(s).toLocaleString() : "—");
 
 function Approvals() {
@@ -49,8 +50,8 @@ function Approvals() {
       <div>
         <span className="eyebrow">HUMAN IN THE LOOP</span><h1 className="page-heading mt-3">Approvals</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Nothing is paid until you approve. Approving places a PayPal Sandbox <strong>authorization hold</strong> — the
-          money is reserved, not taken. It's captured only after the delivery is reviewed.
+          Nothing is paid until you approve. Approving locks the amount in the <strong>NEAR testnet escrow</strong> — the
+          NEAR is reserved, not sent. It's released on-chain to the contractor only after the delivery is reviewed.
         </p>
       </div>
 
@@ -93,22 +94,13 @@ function RequestCard({ r }: { r: Req }) {
   }
 
   async function onApprove() {
-    // Open the tab during the click so popup blockers allow it; point it at PayPal once we have the link.
-    const tab = window.open("", "_blank");
     setBusy("approve");
     try {
       const res = await approve({ data: { requestId: r.id, origin: window.location.origin } });
-      if (res.approveUrl && tab) {
-        tab.opener = null;
-        tab.location.href = res.approveUrl;
-        toast("Approve the payment in the PayPal tab. This page updates when the hold is placed.");
-      } else {
-        tab?.close();
-        report(res);
-      }
+      // Escrow lock is confirmed in-app: verify the escrow balance on NEAR testnet right away.
+      report(res.approveUrl ? await confirm({ data: { requestId: r.id } }) : res);
     } catch {
-      tab?.close();
-      toast.error("Could not start the PayPal hold. Please try again.");
+      toast.error("Could not lock the escrow. Please try again.");
     } finally {
       setBusy(null);
       refresh();
@@ -120,7 +112,7 @@ function RequestCard({ r }: { r: Req }) {
     try {
       report(await confirm({ data: { requestId: r.id } }));
     } catch {
-      toast.error("Could not check with PayPal. Please try again.");
+      toast.error("Could not check NEAR testnet. Please try again.");
     } finally {
       setBusy(null);
       refresh();
@@ -180,20 +172,20 @@ function RequestCard({ r }: { r: Req }) {
         )}
         {r.status === "authorization_failed" && (
           <Notice tone="destructive" title="The hold wasn't placed — no funds are held">
-            {r.authorization_error ?? "PayPal did not complete the authorization."}
+            {r.authorization_error ?? "The NEAR escrow lock did not complete."}
           </Notice>
         )}
         {r.status === "authorizing" && (
-          <Notice tone="info" title="Waiting for you to approve at PayPal">
+          <Notice tone="info" title="Escrow lock in progress">
             {r.paypal_approve_url
-              ? "Approve the payment in the PayPal tab. If you closed it, reopen it below. Checking again is always safe."
-              : "PayPal hasn't confirmed the order yet. Press Approve again — it won't create a second payment."}
+              ? "Payrail is confirming the escrow balance on NEAR testnet. Checking again is always safe."
+              : "The escrow lock hasn't started yet. Press Approve again — it won't create a second payment."}
           </Notice>
         )}
         {r.paypal_authorization_id && (
           <p className="text-xs text-muted-foreground">
-            PayPal Sandbox authorization <span className="font-mono">{r.paypal_authorization_id}</span> · order{" "}
-            <span className="font-mono">{r.paypal_order_id}</span>
+            NEAR escrow hold <span className="font-mono">{r.paypal_authorization_id}</span> · payee{" "}
+            <a className="font-mono underline" href={accountUrl(r.merchant_handle)} target="_blank" rel="noopener noreferrer">{r.merchant_handle}</a>
             {r.paypal_authorization_expires_at ? ` · hold expires ${when(r.paypal_authorization_expires_at)}` : ""}
           </p>
         )}
@@ -209,19 +201,14 @@ function RequestCard({ r }: { r: Req }) {
         <footer className="flex flex-wrap gap-2 border-t bg-muted/40 px-5 py-3">
           {r.status === "authorizing" && r.paypal_approve_url ? (
             <>
-              <Button asChild>
-                <a href={r.paypal_approve_url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="size-4" /> Open PayPal
-                </a>
-              </Button>
-              <Button variant="outline" onClick={onConfirm} disabled={busy !== null}>
-                <RefreshCw className="size-4" /> I've approved — check now
+              <Button onClick={onConfirm} disabled={busy !== null}>
+                <RefreshCw className="size-4" /> Confirm escrow lock
               </Button>
             </>
           ) : (
             <Button onClick={onApprove} disabled={busy !== null}>
               <ShieldCheck className="size-4" />
-              {r.status === "pending_approval" ? "Approve & place hold" : "Try again"}
+              {r.status === "pending_approval" ? "Approve & lock in escrow" : "Try again"}
             </Button>
           )}
           <Button variant="ghost" onClick={onDecline} disabled={busy !== null}>
