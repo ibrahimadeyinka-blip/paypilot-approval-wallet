@@ -146,18 +146,18 @@ function Wallet() {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="merchants">Allowed payees <span className="font-normal text-muted-foreground">(optional)</span></Label>
-          <Input id="merchants" placeholder="@designer, alex@studio.io" aria-describedby="payee-help" value={merchants} onChange={(e) => setMerchants(e.target.value)} />
+          <Input id="merchants" placeholder="designer.testnet, alex.testnet" aria-describedby="payee-help" value={merchants} onChange={(e) => setMerchants(e.target.value)} />
           <p id="payee-help" className="max-w-lg text-xs leading-relaxed text-muted-foreground">Leave blank for any contractor within your limits, subject to your approval. To restrict this token, enter exact contractor handles or emails, separated by commas—not marketplace websites. This list does not set the PayPal payment recipient.</p>
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:col-span-2">
           <div className="space-y-1.5">
             <Label htmlFor="single-cap">Max per payment (NEAR)</Label>
-            <Input id="single-cap" inputMode="decimal" placeholder="150" value={singleCap} onChange={(e) => setSingleCap(e.target.value)} required />
+            <Input id="single-cap" inputMode="decimal" placeholder="10" value={singleCap} onChange={(e) => setSingleCap(e.target.value)} required />
             <p className="text-xs text-muted-foreground">Any single request above this is blocked.</p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="daily-cap">Rolling 24h budget (NEAR)</Label>
-            <Input id="daily-cap" inputMode="decimal" placeholder="500" value={dailyCap} onChange={(e) => setDailyCap(e.target.value)} required />
+            <Input id="daily-cap" inputMode="decimal" placeholder="50" value={dailyCap} onChange={(e) => setDailyCap(e.target.value)} required />
             <p className="text-xs text-muted-foreground">Total this agent can have pending or held in any 24 hours.</p>
           </div>
         </div>

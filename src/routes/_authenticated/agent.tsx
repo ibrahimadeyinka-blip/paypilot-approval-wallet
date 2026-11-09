@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/agent")({
 });
 
 type Msg = { role: "user" | "assistant"; content: string; time: string; draft?: DirectiveDraft | undefined; key?: string; activity?: string[] };
-const money = (c: number) => `$${(c / 100).toFixed(2)}`;
+const money = (c: number) => `${(c / 100).toFixed(2)} NEAR`;
 const timestamp = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 const STARTERS = [
   { label: "A blue tech logo", text: "Commission a minimalist blue tech logo. Pay pixelstudio.testnet. Budget is 5 NEAR. Deliver a transparent PNG and an SVG. Hold the NEAR in escrow until the work is verified." },
