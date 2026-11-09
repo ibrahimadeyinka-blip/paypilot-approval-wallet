@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { completeEscrowConfirm } from "@/lib/agent/approvals.functions";
+import { completePaypalReturn } from "@/lib/agent/approvals.functions";
 import { track } from "@/lib/analytics";
 
 const searchSchema = z.object({
@@ -31,7 +31,7 @@ export const Route = createFileRoute("/escrow/confirm")({
 
 function EscrowConfirm() {
   const { token, cancelled } = Route.useSearch();
-  const complete = useServerFn(completeEscrowConfirm);
+  const complete = useServerFn(completePaypalReturn);
   const started = useRef(false);
   const [result, setResult] = useState<{ status: string; message: string } | null>(null);
 
