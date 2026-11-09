@@ -92,7 +92,7 @@ export const Route = createFileRoute("/api/public/deliver")({
                 description: claim.description ?? "",
                 requirements: claim.requirements ?? null,
                 amountCents: claim.amount_cents ?? 0,
-                currency: claim.currency ?? "USD",
+                currency: claim.currency ?? "NEAR",
               }),
           },
           { requestId: claim.request_id as string, deliverableId },

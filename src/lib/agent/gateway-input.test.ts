@@ -11,10 +11,10 @@ const valid = {
 };
 
 describe("gateway input", () => {
-  it("normalizes merchant to lowercase and defaults currency to USD", () => {
+  it("normalizes merchant to lowercase and defaults currency to NEAR", () => {
     const r = paymentRequestSchema.parse(valid);
     expect(r.merchant_handle).toBe("figma.com");
-    expect(r.currency).toBe("USD");
+    expect(r.currency).toBe("NEAR");
   });
   it("rejects missing source evidence", () => {
     expect(paymentRequestSchema.safeParse({ ...valid, source_context: "" }).success).toBe(false);

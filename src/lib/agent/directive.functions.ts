@@ -67,7 +67,7 @@ export const submitDirective = createServerFn({ method: "POST" })
     const token = await loadToken(context, data.tokenId);
     const req = data.delivery_requirements.trim();
     const description = req ? `${data.description.trim()} — Must deliver: ${req}`.slice(0, 2000) : data.description;
-    const b = paymentRequestSchema.parse({ ...data, description, currency: "USD", source_context: `Owner directive: ${data.directive}` });
+    const b = paymentRequestSchema.parse({ ...data, description, currency: "NEAR", source_context: `Owner directive: ${data.directive}` });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: res, error } = await supabaseAdmin.rpc("submit_agent_payment", {
       p_token_hash: token.token_hash,

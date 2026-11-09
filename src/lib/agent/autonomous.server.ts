@@ -12,7 +12,7 @@ export async function runPurchasingAgent(apiKey: string, messages: ModelMessage[
   let failure: unknown;
   const agent = new ToolLoopAgent({
     model: provider.responses("openai/gpt-6-astra"),
-    instructions: `${instructions}\nRead spending_policy, then call propose_request with the extracted draft (even if incomplete). These tools only read policy and propose requests. You cannot move funds, approve PayPal, discover contractors, or claim a payment is complete.`,
+    instructions: `${instructions}\nRead spending_policy, then call propose_request with the extracted draft (even if incomplete). These tools only read policy and propose requests. You cannot move funds, release escrow, discover contractors, or claim a payment is complete.`,
     maxRetries: 0,
     onError: ({ error }) => { failure = error; },
     stopWhen: [isStepCount(50), hasToolCall("propose_request")],
