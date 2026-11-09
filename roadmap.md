@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Convert Payrail to 100% NEAR testnet escrow (currency, payees, hold, on-chain release, screens); 87 tests pass
+- [ ] Add NEAR escrow account credentials and run a live on-chain release (waiting on the owner's testnet account)
 - [x] Add three counted Approvals tabs and two counted Wallet tabs; 34 tests passed and signed-in desktop/mobile tabs matched real records without changing payment data
 - [x] Restore signup profile creation and repair missing existing profiles; reproduced token failure, then verified signed-in $10/$60 token issuance with blank payees and revoked the test token
 - [x] Add owner-started AI tool runs and opt-in automatic guarded submission (live policy/proposal tool calls passed)
