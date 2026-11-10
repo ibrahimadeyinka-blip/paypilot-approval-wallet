@@ -62,7 +62,7 @@ function Sandbox({ onLock, onRelease }: { onLock: (c: number) => void; onRelease
       <label className="font-mono text-[10px] uppercase text-muted-foreground">amount Ⓝ<input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" className="mt-1 block h-11 w-full border bg-background px-3 font-mono text-sm text-foreground outline-none focus:border-primary" /></label>
       <Button type="submit" className="h-11 self-end rounded-none font-mono">Run guards <Zap /></Button>
     </form>
-    <div className="flex flex-wrap gap-2 px-4 font-mono text-[11px]">{[["pixelstudio.testnet", "5"], ["bigspender.testnet", "24"], ["fiverr.com", "6"]].map(([p, a]) => <button key={p} type="button" onClick={() => { setPayee(p); setAmount(a); }} className="border border-dashed px-2 py-1 text-muted-foreground hover:border-highlight hover:text-highlight">{p} · {a}Ⓝ</button>)}</div>
+    <div className="flex flex-wrap gap-2 px-4 font-mono text-[11px]">{([["pixelstudio.testnet", "5"], ["bigspender.testnet", "24"], ["fiverr.com", "6"]] as const).map(([p, a]) => <button key={p} type="button" onClick={() => { setPayee(p); setAmount(a); }} className="border border-dashed px-2 py-1 text-muted-foreground hover:border-highlight hover:text-highlight">{p} · {a}Ⓝ</button>)}</div>
     <div className="m-4 min-h-[170px] flex-1 border bg-ink p-4 font-mono text-[12px] leading-relaxed">
       {!log ? <p className="text-muted-foreground">&gt; awaiting directive<span className="caret" /></p> : <>
         <p className="text-muted-foreground">&gt; submit {log.payee} · {(log.cents / 100).toFixed(2)} Ⓝ</p>
