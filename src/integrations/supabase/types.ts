@@ -137,6 +137,8 @@ export type Database = {
           decided_by: string | null
           delivery_requirements: string | null
           description: string
+          funder_account_id: string | null
+          funding_tx_hash: string | null
           id: string
           idempotency_key: string | null
           merchant_handle: string
@@ -148,6 +150,7 @@ export type Database = {
           paypal_capture_id: string | null
           paypal_capture_status: string | null
           paypal_order_id: string | null
+          refund_tx_hash: string | null
           settlement_error: string | null
           source_context: string
           status: string
@@ -173,6 +176,8 @@ export type Database = {
           decided_by?: string | null
           delivery_requirements?: string | null
           description?: string
+          funder_account_id?: string | null
+          funding_tx_hash?: string | null
           id?: string
           idempotency_key?: string | null
           merchant_handle?: string
@@ -184,6 +189,7 @@ export type Database = {
           paypal_capture_id?: string | null
           paypal_capture_status?: string | null
           paypal_order_id?: string | null
+          refund_tx_hash?: string | null
           settlement_error?: string | null
           source_context?: string
           status: string
@@ -209,6 +215,8 @@ export type Database = {
           decided_by?: string | null
           delivery_requirements?: string | null
           description?: string
+          funder_account_id?: string | null
+          funding_tx_hash?: string | null
           id?: string
           idempotency_key?: string | null
           merchant_handle?: string
@@ -220,6 +228,7 @@ export type Database = {
           paypal_capture_id?: string | null
           paypal_capture_status?: string | null
           paypal_order_id?: string | null
+          refund_tx_hash?: string | null
           settlement_error?: string | null
           source_context?: string
           status?: string
