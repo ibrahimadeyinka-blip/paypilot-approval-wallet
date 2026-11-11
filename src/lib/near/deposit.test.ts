@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { depositMismatch, depositTagYocto, escrowDepositYocto, orderIdFromApproveUrl } from "./deposit";
 
-const ORDER = "NEAR0123456789ABCDEF012345";
+const ORDER = "NEAR0123456789ABCDEF01234567";
 const OTHER = "NEARFFEEDDCCBBAA998877665544";
 
 describe("escrow deposit amount", () => {
@@ -11,7 +11,7 @@ describe("escrow deposit amount", () => {
     expect(escrowDepositYocto(1000, ORDER)).toBe(10n * 10n ** 24n + tag);
   });
   it("gives different orders different amounts", () => {
-    expect(escrowDepositYocto(500, ORDER)).not.toBe(escrowDepositYocto(500, OTHER.slice(0, 28)));
+    expect(escrowDepositYocto(500, ORDER)).not.toBe(escrowDepositYocto(500, OTHER));
   });
   it("rejects malformed order ids", () => {
     expect(() => depositTagYocto("NEAR123")).toThrow();
