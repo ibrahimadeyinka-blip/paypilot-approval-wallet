@@ -15,7 +15,6 @@ import { PaypalError, type PaypalAuthorization } from "@/lib/paypal/parse";
 import { isNearAccountId, isTestnetPayee, centsToYocto, NEAR_RPC_URL } from "./units";
 import { depositMismatch, escrowDepositYocto } from "./deposit";
 
-const GAS_RESERVE_YOCTO = 50_000_000_000_000_000_000_000n; // 0.05 NEAR kept for fees
 const HOLD_DAYS = 29;
 
 function config() {

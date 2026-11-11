@@ -74,7 +74,7 @@ export async function runApprove(
     case "already_authorized":
       return { status: "authorized", message: "Funds are already on hold for this request." };
     case "not_actionable":
-      return { status: r.status ?? "unknown", message: "This request was already decided." };
+      return { status: r.status ?? "unknown", message: r.reason ?? "This request was already decided." };
     case "in_progress":
       if (r.approve_url) {
         return { status: "authorizing", approveUrl: r.approve_url, message: "Finish confirming the escrow lock." };
