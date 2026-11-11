@@ -3,9 +3,9 @@
  * settlement flows use, so every database safeguard (caps, budget, locks,
  * idempotency) stays in charge:
  *  - createOrder   -> registers an escrow hold and returns the in-app confirm page
- *  - authorizeOrder-> verifies the escrow account can cover the amount on-chain
+ *  - authorizeOrder-> verifies the owner's wallet deposit for this exact order on-chain
  *  - capture       -> sends NEAR on-chain from the escrow account to the payee
- *  - void          -> releases the reservation (no funds leave escrow)
+ *  - void          -> refunds the owner's deposit to the wallet that funded it
  * Testnet only. There is deliberately no mainnet switch.
  */
 import { Account } from "@near-js/accounts";
@@ -13,6 +13,7 @@ import { JsonRpcProvider } from "@near-js/providers";
 import { KeyPairSigner } from "@near-js/signers";
 import { PaypalError, type PaypalAuthorization } from "@/lib/paypal/parse";
 import { isNearAccountId, isTestnetPayee, centsToYocto, NEAR_RPC_URL } from "./units";
+import { depositMismatch, escrowDepositYocto } from "./deposit";
 
 const GAS_RESERVE_YOCTO = 50_000_000_000_000_000_000_000n; // 0.05 NEAR kept for fees
 const HOLD_DAYS = 29;
@@ -55,20 +56,145 @@ async function availableYocto(accountId: string): Promise<bigint> {
   return BigInt(state.balance.available);
 }
 
-async function requestBy(column: "paypal_order_id" | "paypal_authorization_id", value: string) {
+type FundingRow = {
+  id: string;
+  status: string;
+  merchant_handle: string;
+  amount_cents: number;
+  currency: string;
+  paypal_order_id: string | null;
+  funding_tx_hash: string | null;
+  funder_account_id: string | null;
+  refund_tx_hash: string | null;
+};
+const FUNDING_COLUMNS =
+  "id, status, merchant_handle, amount_cents, currency, paypal_order_id, funding_tx_hash, funder_account_id, refund_tx_hash";
+
+async function requestBy(column: "paypal_order_id" | "paypal_authorization_id", value: string): Promise<FundingRow> {
   const db = await admin();
-  const { data, error } = await db
-    .from("agent_payment_requests")
-    .select("id, merchant_handle, amount_cents, currency")
-    .eq(column, value)
-    .maybeSingle();
+  const { data, error } = await db.from("agent_payment_requests").select(FUNDING_COLUMNS).eq(column, value).maybeSingle();
   if (error || !data) throw new PaypalError("api", "Could not find the escrow hold for this request.");
-  return data;
+  return data as FundingRow;
 }
 
 function newOrderId(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(12));
   return "NEAR" + Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+}
+
+const orderFromAuthorization = (authorizationId: string) => authorizationId.replace(/^NEARHOLD-/, "");
+
+/** Statuses where an owner's deposit is no longer backing a hold and must go back to them. */
+const REFUNDABLE = new Set(["voiding", "voided", "declined", "blocked", "authorization_failed"]);
+/** Statuses where a freshly sent deposit may be recorded against its order. */
+const ATTACHABLE = new Set(["authorizing", "declined", "blocked", "authorization_failed"]);
+
+/** Reads a transaction from NEAR testnet RPC. Unknown (not yet indexed) transactions are transient. */
+async function fetchTx(txHash: string, sender: string): Promise<unknown> {
+  let res: Response;
+  try {
+    res = await fetch(NEAR_RPC_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: "vigil", method: "tx", params: { tx_hash: txHash, sender_account_id: sender, wait_until: "EXECUTED_OPTIMISTIC" } }),
+      signal: AbortSignal.timeout(15_000),
+    });
+  } catch (err) {
+    throw wrap(err, "Could not reach NEAR testnet.");
+  }
+  const body = (await res.json().catch(() => null)) as { result?: unknown; error?: { cause?: { name?: string }; message?: string } } | null;
+  if (body?.result) return body.result;
+  const cause = body?.error?.cause?.name ?? "";
+  if (/UNKNOWN_TRANSACTION|TIMEOUT_ERROR/.test(cause) || res.status >= 500) {
+    throw new PaypalError("timeout", "NEAR testnet hasn't finalised your deposit yet.");
+  }
+  throw new PaypalError("api", "NEAR testnet could not find that deposit transaction.");
+}
+
+async function verifyDeposit(row: FundingRow, escrow: string): Promise<void> {
+  if (!row.funding_tx_hash || !row.funder_account_id || !row.paypal_order_id) {
+    throw new PaypalError("api", "No deposit is recorded for this escrow order.");
+  }
+  const result = await fetchTx(row.funding_tx_hash, row.funder_account_id);
+  const reason = depositMismatch(result, {
+    funder: row.funder_account_id,
+    escrow,
+    yocto: escrowDepositYocto(row.amount_cents, row.paypal_order_id),
+  });
+  if (reason) throw new PaypalError("api", reason, undefined, "DEPOSIT_MISMATCH");
+}
+
+/** The escrow account owners deposit into. Account ids are public on-chain. */
+export function escrowAccountId(): string {
+  return config().accountId;
+}
+
+/**
+ * Records the owner's wallet deposit transaction against its escrow order.
+ * Only one deposit per order; the same transaction can never fund two orders.
+ */
+export async function attachDeposit(input: { orderId: string; txHash: string; funder: string }): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const db = await admin();
+  const row = await requestBy("paypal_order_id", input.orderId);
+  if (row.funding_tx_hash) {
+    return row.funding_tx_hash === input.txHash ? { ok: true } : { ok: false, reason: "A different deposit is already recorded for this escrow order." };
+  }
+  if (!ATTACHABLE.has(row.status)) return { ok: false, reason: "This request is no longer waiting for a deposit." };
+  const { data, error } = await db
+    .from("agent_payment_requests")
+    .update({ funding_tx_hash: input.txHash, funder_account_id: input.funder, updated_at: new Date().toISOString() })
+    .eq("id", row.id)
+    .eq("paypal_order_id", input.orderId)
+    .is("funding_tx_hash", null)
+    .select("id");
+  if (error) {
+    return { ok: false, reason: /duplicate|unique/i.test(error.message) ? "That transaction already funded another order." : "Could not record the deposit." };
+  }
+  return data && data.length > 0 ? { ok: true } : { ok: false, reason: "This request changed while recording the deposit. Refresh and try again." };
+}
+
+/**
+ * Sends an owner's deposit back to the wallet that funded it, once, when it no
+ * longer backs a hold. Claims the refund row first so two callers can't both pay.
+ * Returns the refund transaction hash, or null when there is nothing to refund.
+ */
+export async function refundDeposit(orderId: string): Promise<string | null> {
+  const { accountId, key } = config();
+  const db = await admin();
+  const row = await requestBy("paypal_order_id", orderId);
+  if (!row.funding_tx_hash || !row.funder_account_id || row.refund_tx_hash) return row.refund_tx_hash;
+  if (!REFUNDABLE.has(row.status)) return null;
+  const claim = `pending:${crypto.randomUUID()}`;
+  const { data: claimed } = await db
+    .from("agent_payment_requests")
+    .update({ refund_tx_hash: claim })
+    .eq("id", row.id)
+    .is("refund_tx_hash", null)
+    .select("id");
+  if (!claimed || claimed.length === 0) return null;
+  const release = () => db.from("agent_payment_requests").update({ refund_tx_hash: null }).eq("id", row.id).eq("refund_tx_hash", claim);
+  try {
+    await verifyDeposit(row, accountId);
+  } catch (err) {
+    await release();
+    throw err;
+  }
+  try {
+    const signer = KeyPairSigner.fromSecretKey(key as `ed25519:${string}`);
+    const account = new Account(accountId, provider(), signer);
+    const outcome = (await account.transfer({
+      receiverId: row.funder_account_id,
+      amount: escrowDepositYocto(row.amount_cents, orderId),
+    })) as unknown as { transaction?: { hash?: string }; transaction_outcome?: { id?: string } };
+    const hash = outcome.transaction?.hash ?? outcome.transaction_outcome?.id ?? "sent";
+    await db.from("agent_payment_requests").update({ refund_tx_hash: hash }).eq("id", row.id);
+    return hash;
+  } catch (err) {
+    const wrapped = wrap(err, "NEAR testnet rejected the refund transaction.");
+    // Only clear the claim when NEAR clearly refused; an unanswered send may have gone through.
+    if (wrapped.kind !== "timeout" && wrapped.kind !== "network") await release();
+    throw wrapped;
+  }
 }
 
 export const nearEscrow = {
@@ -89,6 +215,7 @@ export const nearEscrow = {
     return { orderId, approveUrl: url.toString() };
   },
 
+  /** Places the hold once the owner's wallet deposit for this exact order is confirmed on-chain. */
   async authorizeOrder(orderId: string): Promise<PaypalAuthorization> {
     const { accountId } = config();
     const req = await requestBy("paypal_order_id", orderId);
@@ -101,14 +228,22 @@ export const nearEscrow = {
     } catch (err) {
       throw wrap(err, `NEAR account ${payee} could not be found on testnet.`);
     }
-    let available: bigint;
-    try {
-      available = await availableYocto(accountId);
-    } catch (err) {
-      throw wrap(err, "Could not read the escrow balance on NEAR testnet.");
+    if (!req.funding_tx_hash) {
+      throw new PaypalError("api", "Waiting for the deposit from your NEAR wallet.", undefined, "PAYER_ACTION_REQUIRED");
     }
-    if (available < centsToYocto(req.amount_cents) + GAS_RESERVE_YOCTO) {
-      throw new PaypalError("api", "The escrow account does not have enough NEAR to cover this payment.");
+    try {
+      await verifyDeposit(req, accountId);
+    } catch (err) {
+      if (err instanceof PaypalError && err.issue === "DEPOSIT_MISMATCH") {
+        // Not a deposit for this order: forget it so the owner can send the right one.
+        const db = await admin();
+        await db
+          .from("agent_payment_requests")
+          .update({ funding_tx_hash: null, funder_account_id: null })
+          .eq("id", req.id)
+          .eq("funding_tx_hash", req.funding_tx_hash);
+      }
+      throw err;
     }
     return {
       authorizationId: `NEARHOLD-${orderId}`,
@@ -121,9 +256,9 @@ export const nearEscrow = {
     return { authorizationId: `NEARHOLD-${orderId}`, status: "CREATED", expiresAt: null };
   },
 
-  /** Releasing a hold keeps the NEAR in escrow; nothing is sent on-chain. */
-  async voidAuthorization(): Promise<void> {
-    return;
+  /** Releasing a hold refunds the owner's wallet deposit on-chain (no-op for older escrow-funded holds). */
+  async voidAuthorization(authorizationId: string): Promise<void> {
+    await refundDeposit(orderFromAuthorization(authorizationId));
   },
 
   /** Sends the held amount on-chain from escrow to the payee. Returns the transaction hash. */
