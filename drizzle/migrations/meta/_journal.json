@@ -22,6 +22,13 @@
       "when": 1794360402447,
       "tag": "0002_wallet_funded_escrow",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794495537745,
+      "tag": "0003_restrict_products_select",
+      "breakpoints": true
     }
   ]
 }
