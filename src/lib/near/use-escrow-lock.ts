@@ -36,5 +36,5 @@ export function useEscrowLock() {
     [wallet, getLock, submit],
   );
 
-  return { lock, accountId: wallet.accountId, ready: wallet.ready };
+  return { lock, accountId: wallet.accountId, ready: wallet.ready, connect: wallet.connect };
 }

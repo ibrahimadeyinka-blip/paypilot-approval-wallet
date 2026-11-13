@@ -1,10 +1,10 @@
-import { formatNear, accountUrl } from "@/lib/near/units";
+import { formatNear, accountUrl, txUrl } from "@/lib/near/units";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
-import { AlertTriangle, Quote, RefreshCw, ShieldCheck, X } from "lucide-react";
+import { AlertTriangle, Quote, RefreshCw, ShieldCheck, Wallet, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -13,6 +13,11 @@ import { approvalsQuery } from "@/lib/agent/tokens";
 import { HAS_DELIVERY, NEEDS_ACTION, statusMeta } from "@/lib/agent/status";
 import { DeliveryPanel } from "@/components/delivery-panel";
 import { approveAgentRequest, confirmAgentAuthorization, declineAgentRequest } from "@/lib/agent/approvals.functions";
+import { WalletButton } from "@/components/wallet-button";
+import { useEscrowLock } from "@/lib/near/use-escrow-lock";
+import { orderIdFromApproveUrl } from "@/lib/near/deposit";
+import { useNearWallet } from "@/lib/near/wallet";
+import { track } from "@/lib/analytics";
 
 export const Route = createFileRoute("/_authenticated/approvals")({
   head: () => ({
@@ -55,6 +60,8 @@ function Approvals() {
         </p>
       </div>
 
+      <WalletPanel />
+
       <Tabs defaultValue="new" className="space-y-6">
         <TabsList aria-label="Approval categories" className="grid h-auto w-full grid-cols-3 rounded-md sm:max-w-lg">
           {groups.map((group) => (
@@ -83,24 +90,54 @@ function RequestCard({ r }: { r: Req }) {
   const approve = useServerFn(approveAgentRequest);
   const confirm = useServerFn(confirmAgentAuthorization);
   const decline = useServerFn(declineAgentRequest);
+  const escrow = useEscrowLock();
   const [busy, setBusy] = useState<null | "approve" | "confirm" | "decline">(null);
   const meta = statusMeta(r.status);
   const refresh = () => qc.invalidateQueries({ queryKey: ["agent_payment_requests"] });
 
   function report(res: { status: string; message: string }) {
-    if (res.status === "authorized") toast.success(res.message);
+    if (res.status === "authorized") {
+      track("project.agent_request_approved", {});
+      toast.success(res.message);
+    } else if (res.status === "cancelled" || res.status === "needs_wallet") toast(res.message);
     else if (["blocked", "authorization_failed", "not_found"].includes(res.status)) toast.error(res.message);
     else toast(res.message);
   }
 
   async function onApprove() {
+    // The owner's own wallet funds the escrow, so it must be connected before anything starts.
+    if (!escrow.accountId) {
+      escrow.connect();
+      toast("Connect your NEAR testnet wallet, then press Approve again.");
+      return;
+    }
     setBusy("approve");
     try {
       const res = await approve({ data: { requestId: r.id, origin: window.location.origin } });
-      // Escrow lock is confirmed in-app: verify the escrow balance on NEAR testnet right away.
-      report(res.approveUrl ? await confirm({ data: { requestId: r.id } }) : res);
-    } catch {
-      toast.error("Could not lock the escrow. Please try again.");
+      const orderId = orderIdFromApproveUrl(res.approveUrl);
+      // Opens the wallet to send the exact deposit; the server verifies it on-chain before placing the hold.
+      report(orderId ? await escrow.lock(orderId) : res);
+    } catch (err) {
+      toast.error(err instanceof Error && /popup/i.test(err.message) ? "Your browser blocked the wallet window. Allow pop-ups for this site, then press Lock from wallet." : "Could not lock the escrow. Please try again.");
+    } finally {
+      setBusy(null);
+      refresh();
+    }
+  }
+
+  async function onLock() {
+    const orderId = orderIdFromApproveUrl(r.paypal_approve_url);
+    if (!orderId) return onApprove();
+    if (!escrow.accountId && !r.funding_tx_hash) {
+      escrow.connect();
+      toast("Connect your NEAR testnet wallet, then press Lock from wallet again.");
+      return;
+    }
+    setBusy("approve");
+    try {
+      report(await escrow.lock(orderId));
+    } catch (err) {
+      toast.error(err instanceof Error && /popup/i.test(err.message) ? "Your browser blocked the wallet window. Allow pop-ups for this site, then try again." : "Could not lock the escrow. Please try again.");
     } finally {
       setBusy(null);
       refresh();
@@ -123,7 +160,7 @@ function RequestCard({ r }: { r: Req }) {
     setBusy("decline");
     try {
       const res = await decline({ data: { requestId: r.id } });
-      if (res.status === "declined") toast.success("Request declined. No funds were held.");
+      if (res.status === "declined") toast.success(res.refundNote ?? "Request declined. No funds were held.");
       else toast(`This request is already ${statusMeta(res.status).label.toLowerCase()}.`);
     } catch {
       toast.error("Could not decline that request.");
@@ -177,10 +214,21 @@ function RequestCard({ r }: { r: Req }) {
         )}
         {r.status === "authorizing" && (
           <Notice tone="info" title="Escrow lock in progress">
-            {r.paypal_approve_url
-              ? "Vigil is confirming the escrow balance on NEAR testnet. Checking again is always safe."
-              : "The escrow lock hasn't started yet. Press Approve again — it won't create a second payment."}
+            {r.funding_tx_hash
+              ? "Your wallet deposit was sent. Vigil is confirming it on NEAR testnet — checking again is always safe."
+              : r.paypal_approve_url
+                ? "Waiting for the deposit from your NEAR wallet. Press Lock from wallet — your wallet shows the exact amount before you sign."
+                : "The escrow lock hasn't started yet. Press Approve again — it won't create a second payment."}
           </Notice>
+        )}
+        {r.funding_tx_hash && (
+          <p className="text-xs text-muted-foreground">
+            Funded from <span className="font-mono">{r.funder_account_id}</span> ·{" "}
+            <a className="font-mono underline" href={txUrl(r.funding_tx_hash)} target="_blank" rel="noopener noreferrer">deposit transaction</a>
+            {r.refund_tx_hash && (
+              <> · <a className="font-mono underline" href={txUrl(r.refund_tx_hash)} target="_blank" rel="noopener noreferrer">refunded</a></>
+            )}
+          </p>
         )}
         {r.paypal_authorization_id && (
           <p className="text-xs text-muted-foreground">
@@ -200,15 +248,28 @@ function RequestCard({ r }: { r: Req }) {
       {NEEDS_ACTION.has(r.status) && (
         <footer className="flex flex-wrap gap-2 border-t bg-muted/40 px-5 py-3">
           {r.status === "authorizing" && r.paypal_approve_url ? (
-            <>
-              <Button onClick={onConfirm} disabled={busy !== null}>
-                <RefreshCw className="size-4" /> Confirm escrow lock
+            r.funding_tx_hash ? (
+              <Button onClick={onLock} disabled={busy !== null}>
+                <RefreshCw className="size-4" /> Check deposit again
               </Button>
-            </>
+            ) : (
+              <>
+                <Button onClick={onLock} disabled={busy !== null}>
+                  <Wallet className="size-4" /> {busy === "approve" ? "Waiting for wallet…" : "Lock from wallet"}
+                </Button>
+                <Button variant="outline" onClick={onConfirm} disabled={busy !== null}>
+                  <RefreshCw className="size-4" /> Check status
+                </Button>
+              </>
+            )
           ) : (
             <Button onClick={onApprove} disabled={busy !== null}>
-              <ShieldCheck className="size-4" />
-              {r.status === "pending_approval" ? "Approve & lock in escrow" : "Try again"}
+              {escrow.accountId ? <ShieldCheck className="size-4" /> : <Wallet className="size-4" />}
+              {busy === "approve"
+                ? "Waiting for wallet…"
+                : r.status === "pending_approval"
+                  ? escrow.accountId ? "Approve & lock from wallet" : "Connect wallet to approve"
+                  : "Try again"}
             </Button>
           )}
           <Button variant="ghost" onClick={onDecline} disabled={busy !== null}>
@@ -235,5 +296,25 @@ function Notice({ tone, title, children }: { tone: "destructive" | "info" | "suc
         <div className="mt-0.5 break-words opacity-90">{children}</div>
       </div>
     </div>
+  );
+}
+
+/** Shows which NEAR testnet wallet funds escrow locks, with the real wallet selector one click away. */
+function WalletPanel() {
+  const { accountId } = useNearWallet();
+  return (
+    <section aria-label="Funding wallet" className="flex flex-wrap items-center justify-between gap-3 rounded-md border bg-card px-5 py-4">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <Wallet className="size-3.5" /> Funding wallet
+        </div>
+        <p className="mt-1 text-sm">
+          {accountId
+            ? "Approving asks this wallet to deposit the exact amount into escrow. You sign every deposit yourself."
+            : "Connect your NEAR testnet wallet. Approving a request sends the deposit from your own balance — Vigil never sees your keys."}
+        </p>
+      </div>
+      <WalletButton />
+    </section>
   );
 }
