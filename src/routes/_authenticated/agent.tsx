@@ -80,7 +80,7 @@ function AgentChat() {
         const directive = next.filter((m) => m.role === "user").map((m) => m.content).join("\n").slice(-2000);
         const r = await submit({ data: { tokenId, idempotencyKey: key, directive, ...d } });
         setSent(next.length);
-        setMsgs([...next, response, { role: "assistant", time: timestamp(), content: r.status === "blocked" ? `Blocked by your safeguards: ${r.reason}. No money moved.` : "Automatically submitted for owner approval. Open Approvals to authorize the PayPal hold. No funds moved." }]);
+        setMsgs([...next, response, { role: "assistant", time: timestamp(), content: r.status === "blocked" ? `Blocked by your safeguards: ${r.reason}. No money moved.` : "Automatically submitted for owner approval. Open Approvals to lock it from your NEAR wallet. No funds moved." }]);
         track(r.status === "blocked" ? "project.agent_request_blocked" : "project.agent_request_sent", { amount_cents: d.amount_cents });
         qc.invalidateQueries({ queryKey: ["agent_payment_requests"] });
         qc.invalidateQueries({ queryKey: ["agent_analytics"] });
@@ -100,7 +100,7 @@ function AgentChat() {
       track(r.status === "blocked" ? "project.agent_request_blocked" : "project.agent_request_sent", { amount_cents: d.amount_cents });
       qc.invalidateQueries({ queryKey: ["agent_analytics"] });
       qc.invalidateQueries({ queryKey: ["agent_payment_requests"] });
-      setMsgs((m) => [...m, { role: "assistant", time: timestamp(), content: r.status === "blocked" ? `Blocked by your safeguards: ${r.reason ?? "limit reached"}. No money moved.` : "Sent. It's waiting in Approvals — approve it to place the PayPal hold." }]);
+      setMsgs((m) => [...m, { role: "assistant", time: timestamp(), content: r.status === "blocked" ? `Blocked by your safeguards: ${r.reason ?? "limit reached"}. No money moved.` : "Sent. It's waiting in Approvals — approve it to lock the NEAR from your wallet." }]);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't send");
     } finally { setBusy(false); }
