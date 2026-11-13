@@ -49,6 +49,7 @@ function EscrowConfirm() {
 
   const ok = result?.status === "authorized";
   const waiting = result === null;
+  const needsDeposit = result?.status === "authorizing";
 
   return (
     <PublicFrame>
@@ -63,9 +64,13 @@ function EscrowConfirm() {
           )}
         </div>
         <h1 className="text-2xl font-semibold">
-          {waiting ? "Confirming on NEAR testnet…" : ok ? "NEAR locked in escrow" : "No hold placed"}
+          {waiting ? "Confirming on NEAR testnet…" : ok ? "NEAR locked in escrow" : needsDeposit ? "Waiting for your wallet deposit" : "No hold placed"}
         </h1>
-        <p className="text-sm text-muted-foreground">{result?.message ?? "This takes a few seconds."}</p>
+        <p className="text-sm text-muted-foreground">
+          {needsDeposit
+            ? "Open Approvals, connect your NEAR testnet wallet and press Lock from wallet. Nothing is held until your deposit is confirmed on-chain."
+            : (result?.message ?? "This takes a few seconds.")}
+        </p>
         {!waiting && (
           <div className="flex flex-col items-center gap-2">
             <Button asChild>

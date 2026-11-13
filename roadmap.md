@@ -29,3 +29,6 @@
 - [x] Agent analytics page (drafted / sent / blocked / approved) + visitor events
 - [x] Shelf-inspired redesign, new logo, live wallet caps
 - [ ] Signed-in screens browser check (needs an account)
+- [x] Personal NEAR wallet: Connect button in top bar; Approvals Approve/Lock from wallet sends the exact deposit (typecheck + 97 tests pass)
+- [ ] Record the signed-in approval workflow showing the real wallet popup (waiting on which account to sign in as)
+- [ ] Live wallet deposit, hold and refund on testnet (needs the owner's funded testnet wallet; escrow account needs gas)
