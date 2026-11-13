@@ -80,7 +80,7 @@ function AgentChat() {
         const directive = next.filter((m) => m.role === "user").map((m) => m.content).join("\n").slice(-2000);
         const r = await submit({ data: { tokenId, idempotencyKey: key, directive, ...d } });
         setSent(next.length);
-        setMsgs([...next, response, { role: "assistant", time: timestamp(), content: r.status === "blocked" ? `Blocked by your safeguards: ${r.reason}. No money moved.` : "Automatically submitted for owner approval. Open Approvals to authorize the PayPal hold. No funds moved." }]);
+        setMsgs([...next, response, { role: "assistant", time: timestamp(), content: r.status === "blocked" ? `Blocked by your safeguards: ${r.reason}. No money moved.` : "Automatically submitted for owner approval. Open Approvals to lock it from your NEAR wallet. No funds moved." }]);
         track(r.status === "blocked" ? "project.agent_request_blocked" : "project.agent_request_sent", { amount_cents: d.amount_cents });
         qc.invalidateQueries({ queryKey: ["agent_payment_requests"] });
         qc.invalidateQueries({ queryKey: ["agent_analytics"] });
@@ -100,7 +100,7 @@ function AgentChat() {
       track(r.status === "blocked" ? "project.agent_request_blocked" : "project.agent_request_sent", { amount_cents: d.amount_cents });
       qc.invalidateQueries({ queryKey: ["agent_analytics"] });
       qc.invalidateQueries({ queryKey: ["agent_payment_requests"] });
-      setMsgs((m) => [...m, { role: "assistant", time: timestamp(), content: r.status === "blocked" ? `Blocked by your safeguards: ${r.reason ?? "limit reached"}. No money moved.` : "Sent. It's waiting in Approvals — approve it to place the PayPal hold." }]);
+      setMsgs((m) => [...m, { role: "assistant", time: timestamp(), content: r.status === "blocked" ? `Blocked by your safeguards: ${r.reason ?? "limit reached"}. No money moved.` : "Sent. It's waiting in Approvals — approve it to lock the NEAR from your wallet." }]);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't send");
     } finally { setBusy(false); }
@@ -121,7 +121,7 @@ function AgentChat() {
           <div className="border-b bg-muted/40 px-4 py-3 sm:px-6">
             <label className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">Agent token<select aria-label="Agent token" disabled={busy} value={tokenId} onChange={(e) => { setTokenId(e.target.value); clearChat(); }} className="min-w-0 max-w-full flex-1 rounded-md border bg-card px-2 py-1.5 text-xs text-foreground">{active.map((t) => <option key={t.id} value={t.id}>{t.label} · {money(t.single_cap_cents)} per payment · {money(t.daily_cap_cents)} / 24h</option>)}</select></label>
             {token && <p className="mt-2 break-words text-[11px] leading-relaxed text-muted-foreground">Payees: {token.merchant_whitelist.length ? token.merchant_whitelist.join(", ") : "Any contractor"} · Expires {new Date(token.expires_at).toLocaleDateString()}</p>}
-            <div className="mt-3 flex flex-wrap items-center gap-3"><Switch id="automatic" checked={automatic} onCheckedChange={setAutomatic} disabled={busy} /><label htmlFor="automatic" className="text-xs">Submit complete requests automatically</label><span className="text-[10px] text-muted-foreground">PayPal holds still need your approval</span></div>
+            <div className="mt-3 flex flex-wrap items-center gap-3"><Switch id="automatic" checked={automatic} onCheckedChange={setAutomatic} disabled={busy} /><label htmlFor="automatic" className="text-xs">Submit complete requests automatically</label><span className="text-[10px] text-muted-foreground">Escrow locks still need your wallet approval</span></div>
           </div>
           <div ref={stream} role="log" aria-label="Conversation" aria-live="polite" className="chat-stream space-y-6 overflow-y-auto px-4 py-6 sm:px-6">
             {msgs.length === 0 && <div className="flex h-full flex-col items-center justify-center py-8 text-center"><span className="mb-5 flex size-14 items-center justify-center rounded-full bg-accent text-accent-foreground"><Sparkles className="size-6" /></span><h2 className="font-display text-2xl font-semibold">What are we making?</h2><p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">A contractor, a budget, a clear deliverable.<br />Every payment stays on your rails.</p><div className="mt-7 flex flex-wrap justify-center gap-2">{STARTERS.map((s) => <Button key={s.label} variant="outline" size="sm" onClick={() => { setInput(s.text); composer.current?.focus(); }}><Sparkles />{s.label}<ArrowUpRight /></Button>)}</div></div>}
