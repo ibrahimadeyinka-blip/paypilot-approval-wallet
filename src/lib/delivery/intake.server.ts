@@ -3,6 +3,8 @@
  * stores the already-validated file privately, records it, runs the AI review and
  * captures only on an "approved" verdict (see settlement-flow.server).
  */
+import type { AllowedMime } from "./files";
+
 export interface DeliveryClaim {
   link_id: string | null;
   request_id: string;
@@ -18,7 +20,7 @@ export type IntakeResult =
   | { ok: true; verdict: string; summary: string; payment: string }
   | { ok: false; error: string };
 
-export async function storeAndReview(claim: DeliveryClaim, file: { bytes: Uint8Array; mime: string; filename: string }): Promise<IntakeResult> {
+export async function storeAndReview(claim: DeliveryClaim, file: { bytes: Uint8Array; mime: AllowedMime; filename: string }): Promise<IntakeResult> {
   const [{ getServerDeps }, { runReviewAndSettle }, { reviewWithVision, REVIEW_MODEL }] = await Promise.all([
     import("@/lib/server-deps.server"),
     import("./settlement-flow.server"),
@@ -54,7 +56,7 @@ export async function storeAndReview(claim: DeliveryClaim, file: { bytes: Uint8A
       review: () =>
         reviewWithVision({
           bytes: file.bytes,
-          mime: file.mime as never,
+          mime: file.mime,
           filename: file.filename,
           vendorName: claim.vendor_name ?? "",
           description: claim.description ?? "",
