@@ -31,4 +31,29 @@ describe("normalizeDraft", () => {
   it("treats malformed AI output as not ready", () => {
     expect(normalizeDraft({ nope: 1 }, []).ready).toBe(false);
   });
+  it("never returns a not-ready draft with an empty question", () => {
+    const cases = [
+      { ...base, ready: false, question: "" },
+      { ...base, ready: false, question: "   " },
+      { ...base, amount_cents: 0, question: "" },
+      { ...base, description: "", question: "" },
+      { ...base, vendor_name: "", question: "" },
+      { ...base, merchant_handle: "", question: "" },
+    ];
+    for (const c of cases) {
+      const d = normalizeDraft(c, []);
+      expect(d.ready || d.question.trim().length > 0).toBe(true);
+    }
+  });
+  it("treats a complete draft flagged not-ready without a question as ready", () => {
+    expect(normalizeDraft({ ...base, ready: false, question: "" }, []).ready).toBe(true);
+  });
+  it("keeps the AI's clarifying question when it has one", () => {
+    const d = normalizeDraft({ ...base, ready: false, question: "Should the logo include text?" }, []);
+    expect(d.ready).toBe(false);
+    expect(d.question).toBe("Should the logo include text?");
+  });
+  it("names the missing budget when no question is given", () => {
+    expect(normalizeDraft({ ...base, amount_cents: 0, question: "" }, []).question).toContain("budget");
+  });
 });

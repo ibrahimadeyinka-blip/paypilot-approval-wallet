@@ -354,6 +354,38 @@ export type Database = {
           },
         ]
       }
+      contractor_accounts: {
+        Row: {
+          display_name: string | null
+          near_account_id: string
+          public_key: string
+          user_id: string
+          verified_at: string
+        }
+        Insert: {
+          display_name?: string | null
+          near_account_id: string
+          public_key: string
+          user_id: string
+          verified_at?: string
+        }
+        Update: {
+          display_name?: string | null
+          near_account_id?: string
+          public_key?: string
+          user_id?: string
+          verified_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contractor_accounts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           buyer_id: string
@@ -801,7 +833,12 @@ export type Database = {
         Args: { p_order_id: string; p_owner_id: string; p_request_id: string }
         Returns: Json
       }
+      claim_contractor_delivery: {
+        Args: { p_request_id: string; p_user_id: string }
+        Returns: Json
+      }
       claim_delivery_link: { Args: { p_token_hash: string }; Returns: Json }
+      contractor_jobs: { Args: never; Returns: Json }
       create_delivery_link: {
         Args: {
           p_days: number
@@ -834,6 +871,22 @@ export type Database = {
         Returns: boolean
       }
       get_delivery_link_info: { Args: { p_token_hash: string }; Returns: Json }
+      link_contractor_account: {
+        Args: {
+          p_account: string
+          p_display_name: string
+          p_public_key: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      owner_verified_payees: {
+        Args: never
+        Returns: {
+          display_name: string
+          near_account_id: string
+        }[]
+      }
       payrail_setup_checks: { Args: never; Returns: Json }
       record_agent_authorization: {
         Args: {

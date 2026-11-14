@@ -74,7 +74,7 @@ function AgentChat() {
       track("project.agent_request_drafted", { ready: d.ready, amount_cents: d.amount_cents });
       qc.invalidateQueries({ queryKey: ["agent_analytics"] });
       const key = crypto.randomUUID();
-      const response: Msg = { role: "assistant", time: timestamp(), content: d.ready ? `Here's a proposal for ${d.vendor_name}, at ${money(d.amount_cents)}. Nothing has been paid.` : d.question, draft: d.ready ? d : undefined, key, activity: d.activity };
+      const response: Msg = { role: "assistant", time: timestamp(), content: d.ready ? `Here's a proposal for ${d.vendor_name}, at ${money(d.amount_cents)}. Nothing has been paid.` : d.question.trim() || "Who should do the work, what should they deliver, and what's the budget in NEAR?", draft: d.ready ? d : undefined, key, activity: d.activity };
       setMsgs([...next, response]);
       if (canAutoSubmit(automatic, d)) {
         const directive = next.filter((m) => m.role === "user").map((m) => m.content).join("\n").slice(-2000);

@@ -34,18 +34,15 @@ export const Route = createFileRoute("/api/public/deliver")({
         if (!check.ok) return json({ error: check.error }, 400);
         const filename = safeFilename(file.name);
 
-        const [{ getServerDeps }, { runReviewAndSettle }, { reviewWithVision, REVIEW_MODEL }] = await Promise.all([
+        const [{ getServerDeps }, { storeAndReview }] = await Promise.all([
           import("@/lib/server-deps.server"),
-          import("@/lib/delivery/settlement-flow.server"),
-          import("@/lib/delivery/vision.server"),
+          import("@/lib/delivery/intake.server"),
         ]);
-        const deps = getServerDeps();
-
-        const claim = (await deps.rpc("claim_delivery_link", { p_token_hash: await sha256Hex(token) })) as {
+        const claim = (await getServerDeps().rpc("claim_delivery_link", { p_token_hash: await sha256Hex(token) })) as {
           outcome: string;
-          link_id?: string;
-          request_id?: string;
-          owner_id?: string;
+          link_id: string;
+          request_id: string;
+          owner_id: string;
           vendor_name?: string;
           description?: string;
           requirements?: string | null;
@@ -57,51 +54,9 @@ export const Route = createFileRoute("/api/public/deliver")({
           return json({ error: msg }, status);
         }
 
-        const deliverableId = crypto.randomUUID();
-        const path = `${claim.owner_id}/${claim.request_id}/${deliverableId}-${filename}`;
-        try {
-          const { error } = await deps.admin.storage.from("deliverables").upload(path, bytes, { contentType: check.mime, upsert: false });
-          if (error) throw error;
-          await deps.rpc("record_deliverable", {
-            p_link_id: claim.link_id,
-            p_request_id: claim.request_id,
-            p_deliverable_id: deliverableId,
-            p_storage_path: path,
-            p_filename: filename,
-            p_mime: check.mime,
-            p_size: bytes.byteLength,
-          });
-        } catch (err) {
-          console.error("deliverable upload failed", err);
-          await deps.admin.storage.from("deliverables").remove([path]).catch(() => undefined);
-          await deps.rpc("release_delivery_link", { p_link_id: claim.link_id }).catch(() => undefined);
-          return json({ error: "We couldn't store your file. Please try again." }, 500);
-        }
-
-        const result = await runReviewAndSettle(
-          {
-            rpc: deps.rpc,
-            paypal: deps.paypal,
-            model: REVIEW_MODEL,
-            review: () =>
-              reviewWithVision({
-                bytes,
-                mime: check.mime,
-                filename,
-                vendorName: claim.vendor_name ?? "",
-                description: claim.description ?? "",
-                requirements: claim.requirements ?? null,
-                amountCents: claim.amount_cents ?? 0,
-                currency: claim.currency ?? "NEAR",
-              }),
-          },
-          { requestId: claim.request_id as string, deliverableId },
-        );
-
-        return json(
-          { received: true, verdict: result.verdict, summary: result.summary, payment: result.payment?.status ?? "held" },
-          200,
-        );
+        const result = await storeAndReview(claim, { bytes, mime: check.mime, filename });
+        if (!result.ok) return json({ error: result.error }, 500);
+        return json({ received: true, verdict: result.verdict, summary: result.summary, payment: result.payment }, 200);
       },
     },
   },
