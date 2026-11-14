@@ -33,8 +33,13 @@ export function normalizeDraft(raw: unknown, allowlist: string[]): DirectiveDraf
         : "Which contractor should I hire? Give their NEAR testnet account, like designer.testnet.",
     };
   }
+  const question = d.question.trim();
   if (d.amount_cents <= 0 || !d.description.trim() || !d.vendor_name.trim()) {
-    return { ...d, ready: false, question: d.question || "What's the budget and what exactly should be delivered?" };
+    const missing = [d.amount_cents <= 0 && "the budget in NEAR", !d.description.trim() && "what should be delivered", !d.vendor_name.trim() && "the contractor's name"].filter(Boolean).join(" and ");
+    return { ...d, ready: false, question: question || `I still need ${missing}.` };
   }
-  return { ...d, question: "" };
+  // Every field passed validation. Keep a real clarifying question, otherwise the draft is ready
+  // (a "not ready" flag with no question used to produce an empty reply).
+  if (!d.ready && question) return { ...d, question };
+  return { ...d, ready: true, question: "" };
 }
