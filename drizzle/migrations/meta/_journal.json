@@ -29,6 +29,13 @@
       "when": 1794495537745,
       "tag": "0003_restrict_products_select",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794622487614,
+      "tag": "0004_contractor_accounts",
+      "breakpoints": true
     }
   ]
 }
