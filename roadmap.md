@@ -32,3 +32,5 @@
 - [x] Personal NEAR wallet: Connect button in top bar; Approvals Approve/Lock from wallet sends the exact deposit (typecheck + 97 tests pass)
 - [ ] Record the signed-in approval workflow showing the real wallet popup (waiting on which account to sign in as)
 - [ ] Live wallet deposit, hold and refund on testnet (needs the owner's funded testnet wallet; escrow account needs gas)
+- [ ] Fix Agent Chat replies that ask for missing details with an empty message
+- [ ] Contractor accounts: verified NEAR payout account, assigned jobs, direct deliverable upload, payouts; ledger shows contractor payouts
